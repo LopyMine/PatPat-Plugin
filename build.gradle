@@ -1,0 +1,97 @@
+import java.awt.*
+
+plugins {
+	id 'java'
+	id("xyz.jpenilla.run-paper") version "2.3.0"
+}
+
+group = findProperty("plugin_maven_group")
+version = findProperty("plugin_version")
+
+base {
+	archivesName = findProperty("plugin_name").toString()
+}
+
+repositories {
+	mavenCentral()
+	maven {
+		name = "spigotmc-repo"
+		url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+	}
+	maven {
+		name = "sonatype"
+		url = "https://oss.sonatype.org/content/groups/public/"
+	}
+}
+
+dependencies {
+	//Spigot API
+	compileOnly("org.spigotmc:spigot-api:${findProperty("spigot-api")}")
+
+	// Lombok
+	compileOnly("org.projectlombok:lombok:${findProperty("lombok-version")}")
+	annotationProcessor("org.projectlombok:lombok:${findProperty("lombok-version")}")
+
+	// Jetbrains Annotations
+	implementation("org.jetbrains:annotations:${findProperty("jetbrains-annotations")}")
+
+	// IO Netty
+	// https://mvnrepository.com/artifact/io.netty/netty-buffer
+	implementation("io.netty:netty-buffer:${findProperty("netty-buffer")}")
+}
+
+def targetJavaVersion = findProperty("java_version") as int
+java {
+	def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
+	if (JavaVersion.current() < javaVersion) {
+		toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+
+	if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+		options.release.set(targetJavaVersion)
+	}
+}
+
+processResources {
+	def props = [:]
+	props.put("version", findProperty("plugin_version"))
+
+	props.each { key, value ->
+		inputs.property key, value
+	}
+
+	filteringCharset 'UTF-8'
+	filesMatching('plugin.yml') {
+		expand(props)
+	}
+}
+
+
+build {
+	doLast {
+		def provider = project.rootProject.layout.buildDirectory.file("libs/")
+		if (provider.isPresent()) {
+			File file = provider.get().getAsFile()
+			if (file.exists() && file.isDirectory()) {
+				Desktop.getDesktop().open(file)
+			}
+		}
+	}
+}
+
+tasks.register('reBuild', Delete) {
+	group = 'build'
+	delete(project.rootProject.layout.buildDirectory.file("libs/${findProperty("plugin_name")}-${version}.jar"))
+	finalizedBy("build")
+}
+
+runServer {
+	minecraftVersion(findProperty("minecraft_version").toString())
+}
+

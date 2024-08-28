@@ -1,0 +1,8 @@
+name: PatPatPlugin
+version: '1.0.0'
+main: net.lopymine.patpat.plugin.patPat.PatPatPlugin
+api-version: '1.21'
+commands:
+  patpat:
+    description: "Command to configure and control the PatPat Plugin"
+    usage: "/patpat"
