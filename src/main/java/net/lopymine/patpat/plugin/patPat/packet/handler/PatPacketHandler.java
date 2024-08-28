@@ -64,7 +64,6 @@ public class PatPacketHandler implements PacketHandler {
 			case DISABLED -> true;
 			case WHITELIST -> uuids.contains(sender.getUniqueId());
 			case BLACKLIST -> !uuids.contains(sender.getUniqueId());
-			case null -> false;
 		};
 	}
 
