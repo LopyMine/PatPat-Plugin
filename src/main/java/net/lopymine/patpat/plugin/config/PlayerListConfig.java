@@ -1,9 +1,9 @@
-package net.lopymine.patpat.plugin.patPat.config;
+package net.lopymine.patpat.plugin.config;
 
 import com.google.gson.Gson;
 import lombok.Getter;
 
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
+import net.lopymine.patpat.plugin.PatPatPlugin;
 
 import java.io.*;
 import java.util.*;

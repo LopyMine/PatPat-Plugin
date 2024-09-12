@@ -1,17 +1,17 @@
-package net.lopymine.patpat.plugin.patPat.command.list;
+package net.lopymine.patpat.plugin.command.list;
 
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
-import net.lopymine.patpat.plugin.patPat.command.PatPatCommandManager;
-import net.lopymine.patpat.plugin.patPat.command.api.ICommand;
-import net.lopymine.patpat.plugin.patPat.config.PlayerListConfig;
+import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.command.api.ICommand;
+import net.lopymine.patpat.plugin.config.PlayerListConfig;
 
 import java.util.*;
 
-public class PatPatListRemoveCommand implements ICommand {
+public class PatPatListAddCommand implements ICommand {
 
 	@Override
 	public List<String> getSuggestions(CommandSender commandSender, String[] strings) {
@@ -26,7 +26,6 @@ public class PatPatListRemoveCommand implements ICommand {
 		if (strings.length == 0) {
 			PatPatCommandManager.sendMessage(commandSender, PatPatCommandManager.getWrongMessage("command"));
 			PatPatCommandManager.sendMessage(commandSender, this.getExampleOfUsage());
-			return;
 		}
 
 		String value = strings[0];
@@ -44,32 +43,32 @@ public class PatPatListRemoveCommand implements ICommand {
 		}
 
 		if (offlinePlayer == null) {
-			PatPatCommandManager.sendMessage(commandSender, "Failed to find player with \"%s\" uuid or nickname".formatted(value));
+			PatPatCommandManager.sendMessage(commandSender, "Failed to find player with \"§6%s§r\" uuid or nickname".formatted(value));
 			return;
 		}
 
 		PlayerListConfig config = PatPatPlugin.getInstance().getPlayerListConfig();
 		Set<UUID> uuids = config.getUuids();
-		if (uuids.remove(offlinePlayer.getUniqueId())) {
-			PatPatCommandManager.sendMessage(commandSender, "Player §6%s§r has been removed to list".formatted(offlinePlayer.getName()));
+		if (uuids.add(offlinePlayer.getUniqueId())) {
+			PatPatCommandManager.sendMessage(commandSender, "Player §6%s§r has been added to list".formatted(offlinePlayer.getName()));
 		} else {
-			PatPatCommandManager.sendMessage(commandSender, "Player §6%s§r was not found in list".formatted(offlinePlayer.getName()));
+			PatPatCommandManager.sendMessage(commandSender, "Player §6%s§r already added to list!".formatted(offlinePlayer.getName()));
 		}
 		config.save();
 	}
 
 	@Override
 	public String getPermissionKey() {
-		return PatPatPlugin.permission("list.remove");
+		return PatPatPlugin.permission("list.add");
 	}
 
 	@Override
 	public String getExampleOfUsage() {
-		return "/patpat list remove [<UUID> | <NICKNAME>]";
+		return "/patpat list add [<UUID> | <NICKNAME>]";
 	}
 
 	@Override
 	public String getDescription() {
-		return "Removes player from the permission list";
+		return "Adds player to the permission list";
 	}
 }

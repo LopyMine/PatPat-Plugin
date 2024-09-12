@@ -34,10 +34,6 @@ dependencies {
 
 	// Jetbrains Annotations
 	implementation("org.jetbrains:annotations:${findProperty("jetbrains-annotations")}")
-
-	// IO Netty
-	// https://mvnrepository.com/artifact/io.netty/netty-buffer
-	implementation("io.netty:netty-buffer:${findProperty("netty-buffer")}")
 }
 
 def targetJavaVersion = findProperty("java_version") as int

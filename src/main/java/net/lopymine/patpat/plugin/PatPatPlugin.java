@@ -1,11 +1,11 @@
-package net.lopymine.patpat.plugin.patPat;
+package net.lopymine.patpat.plugin;
 
 import lombok.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.lopymine.patpat.plugin.patPat.command.PatPatCommandManager;
-import net.lopymine.patpat.plugin.patPat.config.*;
-import net.lopymine.patpat.plugin.patPat.packet.PatPatPacketManager;
+import net.lopymine.patpat.plugin.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.config.*;
+import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
 
 import java.util.logging.Level;
 

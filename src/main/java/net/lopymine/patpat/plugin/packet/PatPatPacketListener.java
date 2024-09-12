@@ -1,10 +1,10 @@
-package net.lopymine.patpat.plugin.patPat.packet;
+package net.lopymine.patpat.plugin.packet;
 
-import io.netty.buffer.*;
+import com.google.common.io.ByteStreams;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
-import net.lopymine.patpat.plugin.patPat.packet.handler.PacketHandler;
+import net.lopymine.patpat.plugin.packet.handler.PacketHandler;
 
 import java.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -19,7 +19,7 @@ public class PatPatPacketListener implements PluginMessageListener {
 		if (packetHandler == null) {
 			return;
 		}
-		packetHandler.handle(player, Unpooled.copiedBuffer(bytes));
+		packetHandler.handle(player, ByteStreams.newDataInput(bytes));
 	}
 
 	public void registerPacket(PacketHandler handler) {

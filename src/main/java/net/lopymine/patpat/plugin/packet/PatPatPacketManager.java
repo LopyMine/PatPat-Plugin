@@ -1,9 +1,9 @@
-package net.lopymine.patpat.plugin.patPat.packet;
+package net.lopymine.patpat.plugin.packet;
 
 import org.bukkit.plugin.messaging.Messenger;
 
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
-import net.lopymine.patpat.plugin.patPat.packet.handler.PatPacketHandler;
+import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.packet.handler.PatPacketHandler;
 
 public class PatPatPacketManager {
 

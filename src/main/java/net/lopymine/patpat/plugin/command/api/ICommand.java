@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.patPat.command.api;
+package net.lopymine.patpat.plugin.command.api;
 
 import org.bukkit.command.CommandSender;
 

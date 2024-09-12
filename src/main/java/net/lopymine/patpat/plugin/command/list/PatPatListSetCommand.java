@@ -1,14 +1,14 @@
-package net.lopymine.patpat.plugin.patPat.command.list;
+package net.lopymine.patpat.plugin.command.list;
 
 import org.bukkit.command.CommandSender;
 
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
-import net.lopymine.patpat.plugin.patPat.command.PatPatCommandManager;
-import net.lopymine.patpat.plugin.patPat.command.api.ICommand;
-import net.lopymine.patpat.plugin.patPat.config.PatPatConfig;
-import net.lopymine.patpat.plugin.patPat.config.options.ListMode;
+import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.command.api.ICommand;
+import net.lopymine.patpat.plugin.config.PatPatConfig;
+import net.lopymine.patpat.plugin.config.options.ListMode;
 
-import java.util.*;
+import java.util.List;
 
 public class PatPatListSetCommand implements ICommand {
 
@@ -33,7 +33,7 @@ public class PatPatListSetCommand implements ICommand {
 			PatPatConfig config = PatPatPlugin.getInstance().getPatPatConfig();
 			config.setListMode(listMode);
 			config.save();
-			PatPatCommandManager.sendMessage(commandSender,"List mode has been changed to §6%s§r", listMode.name());
+			PatPatCommandManager.sendMessage(commandSender, "List mode has been changed to §6%s§r", listMode.name());
 		} catch (IllegalArgumentException e) {
 			PatPatCommandManager.sendMessage(commandSender, PatPatCommandManager.getWrongMessage("list mode"));
 			PatPatCommandManager.sendMessage(commandSender, this.getExampleOfUsage());

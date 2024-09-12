@@ -1,21 +1,20 @@
-package net.lopymine.patpat.plugin.patPat.packet.handler;
+package net.lopymine.patpat.plugin.packet.handler;
 
 import com.google.common.io.*;
-import io.netty.buffer.ByteBuf;
 import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.*;
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
-import net.lopymine.patpat.plugin.patPat.config.options.ListMode;
-import net.lopymine.patpat.plugin.patPat.extension.*;
-import net.lopymine.patpat.plugin.patPat.packet.PatPatPacketManager;
+import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.config.options.ListMode;
+import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
+import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
 import java.util.*;
 import java.util.stream.Stream;
 
-@ExtensionMethod({ByteBufExtension.class, ByteArrayDataExtension.class})
+@ExtensionMethod(ByteArrayDataExtension.class)
 public class PatPacketHandler implements PacketHandler {
 
 	@Override
-	public void handle(Player sender, ByteBuf buf) {
+	public void handle(Player sender, ByteArrayDataInput buf) {
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
 		if (!this.canHandle(sender, plugin)) {
 			return;
@@ -31,7 +30,7 @@ public class PatPacketHandler implements PacketHandler {
 			return;
 		}
 
-		double patVisibilityRadius = plugin.getPatPatConfig().getPatVisibilityRadius();
+		double patVisibilityRadius = plugin.getServer().getViewDistance();
 
 		List<Player> nearbyPlayers = pattedEntity
 				.getNearbyEntities(patVisibilityRadius, patVisibilityRadius, patVisibilityRadius)

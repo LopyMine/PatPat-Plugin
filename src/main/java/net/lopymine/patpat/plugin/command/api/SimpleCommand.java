@@ -1,8 +1,8 @@
-package net.lopymine.patpat.plugin.patPat.command.api;
+package net.lopymine.patpat.plugin.command.api;
 
 import org.bukkit.command.*;
 
-import net.lopymine.patpat.plugin.patPat.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.command.PatPatCommandManager;
 
 import java.util.*;
 import org.jetbrains.annotations.*;

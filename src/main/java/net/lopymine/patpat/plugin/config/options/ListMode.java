@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.patPat.config.options;
+package net.lopymine.patpat.plugin.config.options;
 
 public enum ListMode {
 	WHITELIST,

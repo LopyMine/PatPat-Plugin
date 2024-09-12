@@ -1,10 +1,10 @@
-package net.lopymine.patpat.plugin.patPat.command;
+package net.lopymine.patpat.plugin.command;
 
 import org.bukkit.command.*;
 
-import net.lopymine.patpat.plugin.patPat.PatPatPlugin;
-import net.lopymine.patpat.plugin.patPat.command.api.*;
-import net.lopymine.patpat.plugin.patPat.command.list.*;
+import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.command.api.*;
+import net.lopymine.patpat.plugin.command.list.*;
 
 import java.util.Objects;
 
