@@ -1,6 +1,6 @@
 name: PatPatPlugin
 version: '1.0.0'
-main: net.lopymine.patpat.plugin.patPat.PatPatPlugin
+main: net.lopymine.patpat.plugin.PatPatPlugin
 api-version: '1.16'
 commands:
   patpat:
