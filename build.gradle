@@ -71,19 +71,6 @@ processResources {
 	}
 }
 
-
-build {
-	doLast {
-		def provider = project.rootProject.layout.buildDirectory.file("libs/")
-		if (provider.isPresent()) {
-			File file = provider.get().getAsFile()
-			if (file.exists() && file.isDirectory()) {
-				Desktop.getDesktop().open(file)
-			}
-		}
-	}
-}
-
 tasks.register('reBuild', Delete) {
 	group = 'build'
 	delete(project.rootProject.layout.buildDirectory.file("libs/${findProperty("plugin_name")}-${version}.jar"))
