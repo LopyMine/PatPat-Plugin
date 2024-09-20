@@ -1,4 +1,5 @@
 import me.modmuss50.mpp.ReleaseType
+import java.awt.Desktop
 
 plugins {
 	id("java")
