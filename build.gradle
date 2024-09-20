@@ -1,15 +1,16 @@
-import java.awt.*
+import me.modmuss50.mpp.ReleaseType
 
 plugins {
-	id 'java'
+	id("java")
 	id("xyz.jpenilla.run-paper") version "2.3.0"
+	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
 }
 
-group = findProperty("plugin_maven_group")
-version = findProperty("plugin_version")
+group = project.plugin_maven_group
+version = project.plugin_version
 
 base {
-	archivesName = findProperty("plugin_name").toString()
+	archivesName = project.plugin_name
 }
 
 repositories {
@@ -25,7 +26,7 @@ repositories {
 }
 
 dependencies {
-	//Spigot API
+	// Spigot API
 	compileOnly("org.spigotmc:spigot-api:${findProperty("spigot-api")}")
 
 	// Lombok
@@ -37,8 +38,9 @@ dependencies {
 }
 
 def targetJavaVersion = findProperty("java_version") as int
+def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+
 java {
-	def javaVersion = JavaVersion.toVersion(targetJavaVersion)
 	sourceCompatibility = javaVersion
 	targetCompatibility = javaVersion
 	if (JavaVersion.current() < javaVersion) {
@@ -91,3 +93,137 @@ runServer {
 	minecraftVersion(findProperty("minecraft_version").toString())
 }
 
+publishMods {
+	def pubProperties = getPublicationProperties()
+	if (pubProperties.isEmpty()) {
+		println "[PublishMods] [WARNING] Present publish.properties is empty! Configuration canceled"
+		return
+	}
+
+	def modrinthProjectId = pubProperties.get("modrinth_id").toString()
+	def curseForgeProjectId = pubProperties.get("curseforge_id").toString()
+	def maxJavaVersion = JavaVersion.toVersion(pubProperties.get("max_java_version"))
+	def isClient = Boolean.parseBoolean(pubProperties.get("is_for_client").toString())
+	def isTesting = Boolean.parseBoolean(pubProperties.get("test_publish").toString())
+	def isServer = Boolean.parseBoolean(pubProperties.get("is_for_server").toString())
+	def requiresDepends = pubProperties.get("requires").toString().split(" ")
+	def optionalDepends = pubProperties.get("optional").toString().split(" ")
+	def incompatibleDepends = pubProperties.get("incompatible").toString().split(" ")
+	def embedsDepends = pubProperties.get("embeds").toString().split(" ")
+	def loaders = pubProperties.get("loaders").toString().split(" ")
+	def startSupportedVersion = pubProperties.get("start_supported_version").toString()
+	def endSupportedVersion = pubProperties.get("end_supported_version").toString()
+	def versionTypeProperty = pubProperties.get("version_type").toString().replace("RELEASE", "STABLE")
+	def versionName = "[${startSupportedVersion}-${endSupportedVersion}] ${ project.plugin_name} v${project.plugin_version}"
+	def bl = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
+	def bl2 = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
+	def bl3 = isTesting || bl || bl2
+
+	println "[PublishMods] [INFO] Configuring '${versionName}' for publishing"
+
+	displayName = versionName
+	file = getBuildedFileOrDefault(project.plugin_name, project.plugin_version)
+	changelog = getChangeLog()
+	type = ReleaseType.of(versionTypeProperty)
+	modLoaders.addAll(loaders)
+	dryRun = bl3
+
+	if (bl3) {
+		println "[PublishMods] [WARNING] Test Mode is Enabled!"
+	}
+
+//	curseforge {
+//		projectId = curseForgeProjectId
+//		accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
+//
+//		for (i in javaVersion.ordinal()..<maxJavaVersion.ordinal() + 1) {
+//			javaVersions.add(JavaVersion.values()[i])
+//		}
+//
+//		clientRequired = isClient
+//		serverRequired = isServer
+//
+//	if (startSupportedVersion != endSupportedVersion) {
+//		minecraftVersionRange {
+//			start = startSupportedVersion
+//			end = endSupportedVersion
+//		}
+//	} else {
+//		minecraftVersions.add(endSupportedVersion)
+//	}
+//
+//		if (requiresDepends.first() != "none") {
+//			requires(requiresDepends)
+//		}
+//		if (optionalDepends.first() != "none") {
+//			optional(optionalDepends)
+//		}
+//		if (incompatibleDepends.first() != "none") {
+//			incompatible(incompatibleDepends)
+//		}
+//		if (embedsDepends.first() != "none") {
+//			embeds(embedsDepends)
+//		}
+//	}
+
+	modrinth {
+		displayName = "${project.plugin_name} v${project.plugin_version}"
+		projectId = modrinthProjectId
+		accessToken = providers.environmentVariable("MODRINTH_API_KEY")
+
+		if (startSupportedVersion != endSupportedVersion) {
+			minecraftVersionRange {
+				start = startSupportedVersion
+				end = endSupportedVersion
+			}
+		} else {
+			minecraftVersions.add(endSupportedVersion)
+		}
+
+		if (requiresDepends.first() != "none") {
+			requires(requiresDepends)
+		}
+		if (optionalDepends.first() != "none") {
+			optional(optionalDepends)
+		}
+		if (incompatibleDepends.first() != "none") {
+			incompatible(incompatibleDepends)
+		}
+		if (embedsDepends.first() != "none") {
+			embeds(embedsDepends)
+		}
+	}
+}
+
+Properties getPublicationProperties() {
+	def properties = new Properties()
+	def publicationPropertiesFile = project.rootProject.file("publish/publish.properties")
+	if (publicationPropertiesFile.exists()) {
+		publicationPropertiesFile.withInputStream { stream ->
+			properties.load(stream)
+		}
+	}
+	return properties
+}
+
+def getBuildedFileOrDefault(String pluginName, String pluginVersion) {
+	def path = "libs/${pluginName}-${pluginVersion}.jar"
+	def provider = project.rootProject.layout.buildDirectory.file(path)
+	def regularFile = provider.orNull
+	if (regularFile == null || !regularFile.getAsFile().exists()) {
+		println "[PublishMods] Failed to find jar file at '${path}'! Using archive file!"
+		return jar.archiveFile
+	}
+	return regularFile.getAsFile()
+}
+
+String getChangeLog() {
+	def file = project.rootProject.file("publish/CHANGELOG.md")
+	if (file.exists()) {
+		def text = file.getText()
+		if (!text.isBlank()) {
+			return text
+		}
+	}
+	return "No changelog specified."
+}
