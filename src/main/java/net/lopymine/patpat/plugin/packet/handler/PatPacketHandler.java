@@ -3,10 +3,12 @@ package net.lopymine.patpat.plugin.packet.handler;
 import com.google.common.io.*;
 import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.*;
+
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.config.options.ListMode;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.packet.PatPatPacketManager;
+
 import java.util.*;
 import java.util.stream.Stream;
 

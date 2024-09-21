@@ -1,5 +1,4 @@
 import me.modmuss50.mpp.ReleaseType
-import java.awt.Desktop
 
 plugins {
 	id("java")
@@ -7,11 +6,11 @@ plugins {
 	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
 }
 
-group = project.plugin_maven_group
-version = project.plugin_version
+group = prop("plugin_maven_group")
+version = prop("plugin_version")
 
 base {
-	archivesName = project.plugin_name
+	archivesName = prop("plugin_name")
 }
 
 repositories {
@@ -28,17 +27,17 @@ repositories {
 
 dependencies {
 	// Spigot API
-	compileOnly("org.spigotmc:spigot-api:${findProperty("spigot-api")}")
+	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
-	compileOnly("org.projectlombok:lombok:${findProperty("lombok-version")}")
-	annotationProcessor("org.projectlombok:lombok:${findProperty("lombok-version")}")
+	compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
+	annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
 
 	// Jetbrains Annotations
-	implementation("org.jetbrains:annotations:${findProperty("jetbrains-annotations")}")
+	implementation("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
 }
 
-def targetJavaVersion = findProperty("java_version") as int
+def targetJavaVersion = prop("java_version") as int
 def javaVersion = JavaVersion.toVersion(targetJavaVersion)
 
 java {
@@ -59,7 +58,7 @@ tasks.withType(JavaCompile).configureEach {
 
 processResources {
 	def props = [:]
-	props.put("version", findProperty("plugin_version"))
+	props.put("version", prop("plugin_version"))
 
 	props.each { key, value ->
 		inputs.property key, value
@@ -72,37 +71,31 @@ processResources {
 }
 
 tasks.register('reBuild', Delete) {
-	group = 'build'
-	delete(project.rootProject.layout.buildDirectory.file("libs/${findProperty("plugin_name")}-${version}.jar"))
+	group("build")
+	delete(project.rootProject.layout.buildDirectory.file("libs/${prop("plugin_name")}-${version}.jar"))
 	finalizedBy("build")
 }
 
 runServer {
-	minecraftVersion(findProperty("minecraft_version").toString())
+	minecraftVersion(prop("minecraft_version").toString())
 }
 
 publishMods {
-	def pubProperties = getPublicationProperties()
-	if (pubProperties.isEmpty()) {
-		println "[PublishMods] [WARNING] Present publish.properties is empty! Configuration canceled"
-		return
-	}
-
-	def modrinthProjectId = pubProperties.get("modrinth_id").toString()
-	def curseForgeProjectId = pubProperties.get("curseforge_id").toString()
-	def maxJavaVersion = JavaVersion.toVersion(pubProperties.get("max_java_version"))
-	def isClient = Boolean.parseBoolean(pubProperties.get("is_for_client").toString())
-	def isTesting = Boolean.parseBoolean(pubProperties.get("test_publish").toString())
-	def isServer = Boolean.parseBoolean(pubProperties.get("is_for_server").toString())
-	def requiresDepends = pubProperties.get("requires").toString().split(" ")
-	def optionalDepends = pubProperties.get("optional").toString().split(" ")
-	def incompatibleDepends = pubProperties.get("incompatible").toString().split(" ")
-	def embedsDepends = pubProperties.get("embeds").toString().split(" ")
-	def loaders = pubProperties.get("loaders").toString().split(" ")
-	def startSupportedVersion = pubProperties.get("start_supported_version").toString()
-	def endSupportedVersion = pubProperties.get("end_supported_version").toString()
-	def versionTypeProperty = pubProperties.get("version_type").toString().replace("RELEASE", "STABLE")
-	def versionName = "[${startSupportedVersion}-${endSupportedVersion}] ${ project.plugin_name} v${project.plugin_version}"
+	def loaders = prop("loaders").toString().split(" ")
+	def modrinthProjectId = prop("modrinth_id").toString()
+	def embedsDepends = prop("embeds").toString().split(" ")
+	def curseForgeProjectId = prop("curseforge_id").toString()
+	def requiresDepends = prop("requires").toString().split(" ")
+	def optionalDepends = prop("optional").toString().split(" ")
+	def endSupportedVersion = prop("end_supported_version").toString()
+	def incompatibleDepends = prop("incompatible").toString().split(" ")
+	def startSupportedVersion = prop("start_supported_version").toString()
+	def versionTypeProperty = prop("version_type").toString().replace("RELEASE", "STABLE")
+	def maxJavaVersion = JavaVersion.toVersion(prop("max_java_version"))
+	def isClient = Boolean.parseBoolean(prop("is_for_client)").toString())
+	def isTesting = Boolean.parseBoolean(prop("test_publish)").toString())
+	def isServer = Boolean.parseBoolean(prop("is_for_server)").toString())
+	def versionName = "[${startSupportedVersion}-${endSupportedVersion}] ${prop("plugin_name")} v${prop("plugin_version")}"
 	def bl = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
 	def bl2 = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
 	def bl3 = isTesting || bl || bl2
@@ -110,7 +103,7 @@ publishMods {
 	println "[PublishMods] [INFO] Configuring '${versionName}' for publishing"
 
 	displayName = versionName
-	file = getBuildedFileOrDefault(project.plugin_name, project.plugin_version)
+	file = getVerifiedOrDefaultJar(prop("plugin_name"), prop("plugin_version"))
 	changelog = getChangeLog()
 	type = ReleaseType.of(versionTypeProperty)
 	modLoaders.addAll(loaders)
@@ -155,7 +148,7 @@ publishMods {
 //	}
 
 	modrinth {
-		displayName = "${project.plugin_name} v${project.plugin_version}"
+		displayName = "${prop("plugin_name")} v${prop("plugin_version")}"
 		projectId = modrinthProjectId
 		accessToken = providers.environmentVariable("MODRINTH_API_KEY")
 
@@ -183,18 +176,7 @@ publishMods {
 	}
 }
 
-Properties getPublicationProperties() {
-	def properties = new Properties()
-	def publicationPropertiesFile = project.rootProject.file("publish/publish.properties")
-	if (publicationPropertiesFile.exists()) {
-		publicationPropertiesFile.withInputStream { stream ->
-			properties.load(stream)
-		}
-	}
-	return properties
-}
-
-def getBuildedFileOrDefault(String pluginName, String pluginVersion) {
+def getVerifiedOrDefaultJar(String pluginName, String pluginVersion) {
 	def path = "libs/${pluginName}-${pluginVersion}.jar"
 	def provider = project.rootProject.layout.buildDirectory.file(path)
 	def regularFile = provider.orNull
@@ -214,4 +196,8 @@ String getChangeLog() {
 		}
 	}
 	return "No changelog specified."
+}
+
+String prop(String key) {
+	return findProperty(key).toString()
 }
