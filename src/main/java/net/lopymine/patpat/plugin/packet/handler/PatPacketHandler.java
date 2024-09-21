@@ -32,7 +32,7 @@ public class PatPacketHandler implements PacketHandler {
 
 		double patVisibilityRadius = plugin.getServer().getViewDistance();
 
-		List<Player> nearbyPlayers = pattedEntity
+		List<Player> nearbyPlayers = new ArrayList<>(pattedEntity
 				.getNearbyEntities(patVisibilityRadius, patVisibilityRadius, patVisibilityRadius)
 				.stream()
 				.flatMap((entity) -> {
@@ -40,7 +40,11 @@ public class PatPacketHandler implements PacketHandler {
 						return Stream.of(player);
 					}
 					return Stream.empty();
-				}).toList();
+				}).toList());
+
+		if (pattedEntity instanceof Player player) {
+			nearbyPlayers.add(player);
+		}
 
 		for (Player player : nearbyPlayers) {
 			if (player.getUniqueId().equals(sender.getUniqueId())) {
