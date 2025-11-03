@@ -2,8 +2,11 @@ package net.lopymine.patpat.plugin;
 
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import net.lopymine.patpat.plugin.api.PatPatAPI;
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
@@ -40,6 +43,8 @@ public class PatPatPlugin extends JavaPlugin {
 		PatPatCommandManager.register();
 		PatPatPlayerEventHandler.register();
 		PatTranslator.register();
+
+		Bukkit.getServicesManager().register(PatPatAPI.class, new PatPatAPIImpl(), this, ServicePriority.Normal);
 
 		PatLogger.info("Plugin started");
 	}

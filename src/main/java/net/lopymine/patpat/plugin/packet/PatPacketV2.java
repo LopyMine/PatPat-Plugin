@@ -40,10 +40,10 @@ public class PatPacketV2 implements IPatPacket {
 	}
 
 	@Override
-	public PatPacket getPacket(Entity pattedEntity, Entity whoPattedEntity) {
+	public PatPacket getPacket(Entity pattedEntity, @Nullable Entity whoPattedEntity) {
 		ByteArrayDataOutput buf = ByteStreams.newDataOutput();
 		buf.writeVarInt(pattedEntity.getEntityId());
-		buf.writeVarInt(whoPattedEntity.getEntityId());
+		buf.writeVarInt(whoPattedEntity != null ? whoPattedEntity.getEntityId() : Integer.MIN_VALUE);
 		return new PatPacket(buf.toByteArray(), PACKET_ID);
 	}
 

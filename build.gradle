@@ -9,8 +9,36 @@ plugins {
 group = prop("plugin_maven_group")
 version = prop("plugin_version")
 
+def mainJava = prop("java_version") as int
+def testJava = 21
+
+def mainJavaVersion = JavaVersion.toVersion(mainJava)
+
 base {
 	archivesName = prop("plugin_name")
+}
+
+allprojects {
+	repositories {
+		mavenCentral()
+		maven {
+			name = "spigotmc-repo"
+			url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
+		}
+	}
+
+
+	java {
+		sourceCompatibility = mainJavaVersion
+		targetCompatibility = mainJavaVersion
+		if (JavaVersion.current() < mainJavaVersion) {
+			toolchain.languageVersion = JavaLanguageVersion.of(mainJava)
+		}
+	}
+	tasks.withType(JavaCompile) {
+		options.encoding = 'UTF-8'
+		options.release = mainJava as int
+	}
 }
 
 repositories {
@@ -33,8 +61,26 @@ configurations {
 	extraLibs
 }
 
+subprojects {
+	apply plugin: 'java'
+
+	dependencies {
+		// Spigot API
+		compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
+
+		// Lombok
+		compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
+		annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
+
+		// Jetbrains Annotations
+		implementation("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
+	}
+}
+
 dependencies {
-	// Spigot API
+	implementation(project(":api"))
+	extraLibs(project(":api"))
+
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
@@ -55,10 +101,6 @@ dependencies {
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
 }
 
-def mainJava = prop("java_version") as int
-def testJava = 21
-
-def mainJavaVersion = JavaVersion.toVersion(mainJava)
 java {
 	sourceCompatibility = mainJavaVersion
 	targetCompatibility = mainJavaVersion
