@@ -9,6 +9,7 @@ import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.command.api.*;
 import net.lopymine.patpat.plugin.command.info.InfoCommand;
 import net.lopymine.patpat.plugin.command.list.*;
+import net.lopymine.patpat.plugin.command.pat.PatCommand;
 import net.lopymine.patpat.plugin.command.ratelimit.*;
 import net.lopymine.patpat.plugin.command.ratelimit.set.*;
 import net.lopymine.patpat.plugin.command.reload.ReloadCommand;
@@ -31,13 +32,15 @@ public class PatPatCommandManager {
 		SimpleCommand rateLimitCommand = registerRateLimitCommand();
 		SimpleCommand reloadCommand = getSimpleCommand(new ReloadCommand());
 		SimpleCommand infoCommand = getSimpleCommand(new InfoCommand());
+		SimpleCommand patCommand = getSimpleCommand(new PatCommand());
 
 		SimpleCommand rootCommand = SimpleCommand.builder()
-				.usage("/patpat (info | list | ratelimit | reload)")
+				.usage("/patpat (info | list | ratelimit | reload | pat)")
 				.child(listCommand, "list")
 				.child(rateLimitCommand, "ratelimit")
 				.child(reloadCommand, "reload")
 				.child(infoCommand, "info")
+				.child(patCommand, "pat")
 				.build();
 
 		PatPatPlugin plugin = PatPatPlugin.getInstance();

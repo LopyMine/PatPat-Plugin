@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import net.lopymine.patpat.plugin.api.PatPatAPI;
+import net.lopymine.patpat.plugin.api.PatPatPluginAPI;
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
@@ -44,7 +44,7 @@ public class PatPatPlugin extends JavaPlugin {
 		PatPatPlayerEventHandler.register();
 		PatTranslator.register();
 
-		Bukkit.getServicesManager().register(PatPatAPI.class, new PatPatAPIImpl(), this, ServicePriority.Normal);
+		Bukkit.getServicesManager().register(PatPatPluginAPI.class, new PatPatPluginAPIImpl(), this, ServicePriority.Normal);
 
 		PatLogger.info("Plugin started");
 	}

@@ -5,7 +5,10 @@ import org.bukkit.entity.Player;
 
 import org.jetbrains.annotations.Nullable;
 
-public interface PatPatAPI {
+/**
+ * Represents the API for the PatPat plugin.
+ */
+public interface PatPatPluginAPI {
 
 	/**
 	 * Performs a patting action on the specified entity.
