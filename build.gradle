@@ -115,6 +115,8 @@ jar {
 }
 
 tasks.shadowJar {
+	archiveClassifier.set("")
+
 	dependsOn test
 
 	exclude 'META-INF/**'
