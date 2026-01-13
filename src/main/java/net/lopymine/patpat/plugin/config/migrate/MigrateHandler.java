@@ -1,11 +1,12 @@
 package net.lopymine.patpat.plugin.config.migrate;
 
+
 public interface MigrateHandler {
 
 	String getVersion();
 
-	boolean needMigrate();
+	boolean needMigrate(JsonConfigReader jsonConfigReader);
 
-	boolean migrate();
+	boolean migrate(JsonConfigReader jsonConfigReader);
 
 }

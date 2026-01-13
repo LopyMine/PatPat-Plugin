@@ -87,7 +87,7 @@ public class RateLimitInfoCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.info");
+		return StringUtils.commandPermission("ratelimit.info");
 	}
 
 	@Override

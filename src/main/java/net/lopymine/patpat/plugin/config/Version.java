@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public record Version(int major, int minor, int patch) implements Comparable<Version> {
 
 	public static final Version INVALID = new Version(-1, -1, -1);
-	public static final Version SERVER_CONFIG_VERSION = new Version(1, 0, 0);
+	public static final Version SERVER_CONFIG_VERSION = new Version(1, 0, 1);
 	public static final Version CURRENT_PLUGIN_VERSION;
 
 	public static Version of(@NotNull String version) {

@@ -2,11 +2,11 @@ package net.lopymine.patpat.plugin.util;
 
 import java.io.File;
 
-public class FileUtils {
+public class TestingFileUtils {
 
 	private static final String RESOURCE_PATH = "build/resources/test";
 
-	private FileUtils() {
+	private TestingFileUtils() {
 		throw new IllegalStateException("Utility class");
 	}
 

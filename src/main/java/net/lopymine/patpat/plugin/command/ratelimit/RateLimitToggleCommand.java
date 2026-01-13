@@ -36,7 +36,7 @@ public abstract class RateLimitToggleCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.toggle");
+		return StringUtils.commandPermission("ratelimit.toggle");
 	}
 
 	@Override

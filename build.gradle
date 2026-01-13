@@ -2,8 +2,8 @@ import me.modmuss50.mpp.ReleaseType
 
 plugins {
 	id("java")
-	id("xyz.jpenilla.run-paper") version "2.3.0"
 	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
+	id("com.gradleup.shadow") version "9.3.1"
 }
 
 group = prop("plugin_maven_group")
@@ -55,10 +55,7 @@ repositories {
 		name = "papermc-repo"
 		url = "https://repo.papermc.io/repository/maven-public/"
 	}
-}
 
-configurations {
-	extraLibs
 }
 
 subprojects {
@@ -68,9 +65,9 @@ subprojects {
 		// Spigot API
 		compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
-		// Lombok
-		compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
-		annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
+//		// Lombok
+//		compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
+//		annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
 
 		// Jetbrains Annotations
 		compileOnly("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
@@ -79,7 +76,6 @@ subprojects {
 
 dependencies {
 	implementation(project(":api"))
-	extraLibs(project(":api"))
 
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
@@ -91,8 +87,7 @@ dependencies {
 	compileOnly("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
 
 	// Adventure-API
-	implementation("net.kyori:adventure-platform-bukkit:4.4.1")
-	extraLibs("net.kyori:adventure-platform-bukkit:4.4.1")
+	implementation("net.kyori:adventure-platform-bukkit:${prop("adventure-platform-bukkit")}")
 
 	testImplementation('ch.qos.logback:logback-classic:1.5.18')
 	testImplementation(platform('org.junit:junit-bom:5.12.2'))
@@ -117,17 +112,18 @@ processResources.dependsOn submodulesUpdate
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.shadowJar {
+	dependsOn test
+
+	exclude 'META-INF/**'
 	from("patpat-languages-files/lang") {
 		into "lang"
 	}
+	relocate 'net.kyori', 'shaded.net.kyori'
 
-	from {
-		configurations.extraLibs.collect {
-			it.isDirectory() ? it : zipTree(it)
-		}
-	} {
-		exclude 'META-INF/**'
-	}
+	destinationDirectory = file("$rootDir/libs")
 }
 
 test {
@@ -165,17 +161,11 @@ processResources {
 	}
 }
 
-tasks.register('reBuild', Delete) {
-	group("build")
-	delete(project.rootProject.layout.buildDirectory.file("libs/${prop("plugin_name")}-${version}.jar"))
-	finalizedBy("build")
-}
-
 tasks.register('copyPluginJar', Copy) {
-	dependsOn jar
+	dependsOn shadowJar
 	onlyIf { project.hasProperty('outputDir') }
 
-	from jar.archiveFile
+	from shadowJar.archiveFile
 	into file(project.findProperty('outputDir') ?: 'undefined')
 
 	duplicatesStrategy = DuplicatesStrategy.INCLUDE
@@ -189,10 +179,7 @@ tasks.register('copyPluginJar', Copy) {
 	}
 }
 build.finalizedBy copyPluginJar
-
-runServer {
-	minecraftVersion(prop("minecraft_version").toString())
-}
+shadowJar.finalizedBy copyPluginJar
 
 publishMods {
 	def loaders = prop("loaders").toString().split(" ")
@@ -205,7 +192,6 @@ publishMods {
 	def incompatibleDepends = prop("incompatible").toString().split(" ")
 	def startSupportedVersion = prop("start_supported_version").toString()
 	def versionTypeProperty = prop("version_type").toString().replace("RELEASE", "STABLE")
-	def maxJavaVersion = JavaVersion.toVersion(prop("max_java_version"))
 	def isClient = Boolean.parseBoolean(prop("is_for_client)").toString())
 	def isTesting = Boolean.parseBoolean(prop("test_publish)").toString())
 	def isServer = Boolean.parseBoolean(prop("is_for_server)").toString())

@@ -36,13 +36,13 @@ public class InfoCommand implements ICommand {
 		Component style = Component.empty().clickEvent(clickEvent).hoverEvent(hoverEvent);
 
 		this.platformComponent         = Component.translatable("patpat.command.info.platform")
-				.args(Component.text(platformVersion).color(NamedTextColor.GOLD))
+				.arguments(Component.text(platformVersion).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
 		this.pluginVersionComponent    = Component.translatable("patpat.command.info.version")
-				.args(Component.text(pluginVersion).color(NamedTextColor.GOLD))
+				.arguments(Component.text(pluginVersion).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
 		this.minecraftVersionComponent = Component.translatable("patpat.command.info.minecraft_version")
-				.args(Component.text(minecraftVersion).color(NamedTextColor.GOLD))
+				.arguments(Component.text(minecraftVersion).color(NamedTextColor.GOLD))
 				.mergeStyle(style);
 	}
 
@@ -60,7 +60,7 @@ public class InfoCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("info");
+		return StringUtils.commandPermission("info");
 	}
 
 	@Override

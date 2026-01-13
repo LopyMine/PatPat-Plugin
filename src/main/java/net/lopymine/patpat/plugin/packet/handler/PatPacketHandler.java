@@ -184,6 +184,11 @@ public class PatPacketHandler implements IPacketHandler {
 
 	private boolean canHandle(Player sender) {
 		UUID senderUuid = sender.getUniqueId();
+		PatPatConfig config = PatPatConfig.getInstance();
+		if(config.getPermissionRestrictions().isEnabled() && !sender.hasPermission(config.getPermissionRestrictions().getPermissionForPat())) {
+			return false;
+		}
+
 		if (!sender.hasPermission(PatPatConfig.getInstance().getRateLimit().getPermissionBypass()) && !RateLimitManager.canPat(senderUuid)) {
 			return false;
 		}

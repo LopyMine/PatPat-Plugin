@@ -16,27 +16,9 @@ java {
 	withJavadocJar()
 }
 
-configurations {
-	lombokClasspath {
-		canBeResolved = true
-		extendsFrom(configurations.compileOnly)
-	}
-}
+tasks.withType(Javadoc).configureEach {
+	options.docTitle = "PatPat Plugin API "+version
+	options.windowTitle = options.docTitle
 
-tasks.register('delombokSources', JavaExec) {
-	mainClass.set('lombok.launch.Main')
-	args('delombok', 'src/main/java', '-d', 'build/delombok')
-	classpath = configurations.lombokClasspath
-}
-
-tasks.named('sourcesJar') {
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-	dependsOn('delombokSources')
-	from('build/delombok')
-}
-
-tasks.named('javadoc', Javadoc) {
-	dependsOn('delombokSources')
-	source = fileTree('build/delombok')
-	classpath = sourceSets.main.compileClasspath
+	//options.addBooleanOption('Xdoclint:none', true)
 }

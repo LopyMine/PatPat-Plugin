@@ -2,6 +2,7 @@ package net.lopymine.patpat.plugin.command.pat;
 
 import lombok.experimental.ExtensionMethod;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.*;
@@ -16,11 +17,12 @@ import java.util.*;
 @ExtensionMethod(CommandSenderExtension.class)
 public class PatCommand implements ICommand {
 
-	private static final int MAX_DISTANCE_SUGGESTION_ENTITY = 32;
+	private static final int MAX_DISTANCE_SUGGESTION_ENTITY = 16;
 
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
 		if (strings.length != 1) {
+			sender.sendMsg(Component.text(getExampleOfUsage()));
 			return;
 		}
 
@@ -31,11 +33,11 @@ public class PatCommand implements ICommand {
 			UUID uuid = UUID.fromString(value);
 			Entity entity = Bukkit.getEntity(uuid);
 			if (entity == null) {
-				sender.sendMsg("patpat.command.error.entity_not_exist", value);
+				sender.sendMsg("patpat.command.error.entity_not_exist", Component.text(value).color(NamedTextColor.GOLD));
 				return;
 			}
 			if (!(entity instanceof LivingEntity livingEntity)) {
-				sender.sendMsg("patpat.command.error.entity_not_living_entity", value);
+				sender.sendMsg("patpat.command.error.entity_not_living_entity", Component.text(value).color(NamedTextColor.GOLD));
 				return;
 			}
 			pattedEntity = livingEntity;
@@ -43,16 +45,18 @@ public class PatCommand implements ICommand {
 		} catch (IllegalArgumentException ignored) {
 			Player player = Bukkit.getPlayerExact(value);
 			if (player == null) {
-				sender.sendMsg("patpat.command.error.player_not_exist", value);
+				sender.sendMsg("patpat.command.error.player_not_exist", Component.text(value).color(NamedTextColor.GOLD));
 				return;
 			}
 			if (!player.isOnline()) {
-				sender.sendMsg("patpat.command.error.player_not_online", value);
+				sender.sendMsg("patpat.command.error.player_not_online", Component.text(value).color(NamedTextColor.GOLD));
 				return;
 			}
 			pattedEntity = player;
 		}
 		PatPacketHandler.showPatPacket(pattedEntity, whoPatted, false);
+		String patSuccessKey = pattedEntity instanceof Player ? "patpat.command.pat.success.player" : "patpat.command.pat.success.mob";
+		sender.sendMsg(patSuccessKey, Component.text(value).color(NamedTextColor.GOLD));
 	}
 
 	@Override
@@ -86,7 +90,7 @@ public class PatCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("pat");
+		return StringUtils.commandPermission("pat");
 	}
 
 	@Override
