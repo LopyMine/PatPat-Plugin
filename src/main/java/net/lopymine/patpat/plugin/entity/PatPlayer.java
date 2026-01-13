@@ -2,14 +2,11 @@ package net.lopymine.patpat.plugin.entity;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.Getter;
-import lombok.experimental.ExtensionMethod;
-import net.kyori.adventure.text.ComponentLike;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import net.lopymine.patpat.plugin.config.Version;
-import net.lopymine.patpat.plugin.extension.PlayerExtension;
 import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.packet.handler.PatPacketHandler;
 
@@ -17,7 +14,6 @@ import java.util.*;
 import org.jetbrains.annotations.*;
 
 @Getter
-@ExtensionMethod(PlayerExtension.class)
 public class PatPlayer {
 
 	private static final Map<Player, PatPlayer> PAT_PLAYERS = new HashMap<>();
@@ -75,13 +71,5 @@ public class PatPlayer {
 
 	public World getWorld() {
 		return player.getWorld();
-	}
-
-	public void sendPatPatMessage(String message, Object... args) {
-		this.player.sendPatPatMessage(message, args);
-	}
-
-	public void sendPatPatMessage(ComponentLike message) {
-		this.player.sendPatPatMessage(message);
 	}
 }

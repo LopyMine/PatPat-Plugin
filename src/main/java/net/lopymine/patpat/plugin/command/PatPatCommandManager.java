@@ -2,13 +2,15 @@ package net.lopymine.patpat.plugin.command;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.command.api.*;
 import net.lopymine.patpat.plugin.command.info.InfoCommand;
 import net.lopymine.patpat.plugin.command.list.*;
+import net.lopymine.patpat.plugin.command.pat.PatCommand;
+import net.lopymine.patpat.plugin.command.permission.*;
+import net.lopymine.patpat.plugin.command.permission.set.PermissionSetCommand;
 import net.lopymine.patpat.plugin.command.ratelimit.*;
 import net.lopymine.patpat.plugin.command.ratelimit.set.*;
 import net.lopymine.patpat.plugin.command.reload.ReloadCommand;
@@ -29,15 +31,19 @@ public class PatPatCommandManager {
 	public static void register() {
 		SimpleCommand listCommand = registerListCommand();
 		SimpleCommand rateLimitCommand = registerRateLimitCommand();
+		SimpleCommand permissionCommand = registerPermissionCommand();
 		SimpleCommand reloadCommand = getSimpleCommand(new ReloadCommand());
 		SimpleCommand infoCommand = getSimpleCommand(new InfoCommand());
+		SimpleCommand patCommand = getSimpleCommand(new PatCommand());
 
 		SimpleCommand rootCommand = SimpleCommand.builder()
-				.usage("/patpat (info | list | ratelimit | reload)")
+				.usage("/patpat (info | list | ratelimit | reload | pat | permission)")
 				.child(listCommand, "list")
 				.child(rateLimitCommand, "ratelimit")
 				.child(reloadCommand, "reload")
 				.child(infoCommand, "info")
+				.child(patCommand, "pat")
+				.child(permissionCommand, "permission")
 				.build();
 
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
@@ -53,7 +59,7 @@ public class PatPatCommandManager {
 		SimpleCommand removeFromListCommand = getSimpleCommand(new ListRemoveCommand());
 
 		return SimpleCommand.builder()
-				.permission(StringUtils.permission("list"))
+				.permission(StringUtils.commandPermission("list"))
 				.usage("/patpat list (info | set | add | remove)")
 				.child(infoCommand, "info")
 				.child(setModeCommand, "set")
@@ -92,6 +98,22 @@ public class PatPatCommandManager {
 				.build();
 	}
 
+	private static SimpleCommand registerPermissionCommand() {
+		SimpleCommand setCommand = getSimpleCommand(new PermissionSetCommand());
+		SimpleCommand enableCommand = getSimpleCommand(new PermissionEnableCommand());
+		SimpleCommand disableCommand = getSimpleCommand(new PermissionDisableCommand());
+
+		return SimpleCommand.builder()
+				.permission(StringUtils.permission("ratelimit"))
+				.usage("/patpat permission [enable | disable | set]")
+				.child(enableCommand, "enable")
+				.child(disableCommand, "disable")
+				.child(setCommand, "set")
+				.msgNoPermission(NO_PERMISSION_MESSAGE)
+				.executor(new PermissionCommand())
+				.build();
+	}
+
 	public static SimpleCommand getSimpleCommand(ICommand command) {
 		return SimpleCommand.builder()
 				.permission(command.getPermissionKey())
@@ -114,14 +136,6 @@ public class PatPatCommandManager {
 			simpleCommandBuilder.child(childCommand.getCommand(), childCommand.getName(), childCommand.getAliases());
 		}
 		return simpleCommandBuilder.build();
-	}
-
-	public static void sendMessage(CommandSender sender, String message, Object... args) {
-		sender.sendMessage(getPluginMessage(message.formatted(args)));
-	}
-
-	public static String getPluginMessage(String message) {
-		return "[§aPatPat§f] " + message;
 	}
 
 

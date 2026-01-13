@@ -63,7 +63,7 @@ public class LimitCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.set.limit");
+		return StringUtils.commandPermission("ratelimit.set.limit");
 	}
 
 	@Override

@@ -6,8 +6,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
 import net.lopymine.patpat.plugin.PatPatPlugin;
-import net.lopymine.patpat.plugin.command.PatPatCommandManager;
 import net.lopymine.patpat.plugin.util.ComponentUtils;
+
+import java.util.Arrays;
 
 public class CommandSenderExtension {
 
@@ -19,8 +20,8 @@ public class CommandSenderExtension {
 		throw new IllegalStateException("Extension class");
 	}
 
-	public static void sendMsg(CommandSender sender, String message, Object... args) {
-		sender.sendMessage(PatPatCommandManager.getPluginMessage(message.formatted(args)));
+	public static void sendMsg(CommandSender sender, String key, Object... args) {
+		PatPatPlugin.getAdventure().sender(sender).sendMessage(PREFIX_COMPONENT.append(Component.translatable(key).arguments(Arrays.stream(args).map(str->Component.text(str.toString())).toList())));
 	}
 
 	public static void sendMsg(CommandSender sender, ComponentLike message) {
@@ -28,6 +29,6 @@ public class CommandSenderExtension {
 	}
 
 	public static void sendMsg(CommandSender sender, String key, ComponentLike... args) {
-		PatPatPlugin.getAdventure().sender(sender).sendMessage(PREFIX_COMPONENT.append(Component.translatable(key).args(args)));
+		PatPatPlugin.getAdventure().sender(sender).sendMessage(PREFIX_COMPONENT.append(Component.translatable(key).arguments(args)));
 	}
 }

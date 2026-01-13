@@ -1,6 +1,5 @@
 package net.lopymine.patpat.plugin.event;
 
-import lombok.experimental.ExtensionMethod;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,10 +8,8 @@ import org.bukkit.event.player.*;
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
-import net.lopymine.patpat.plugin.extension.PlayerExtension;
 import net.lopymine.patpat.plugin.packet.handler.HelloPacketHandler;
 
-@ExtensionMethod(PlayerExtension.class)
 public class PatPatPlayerEventHandler implements Listener {
 
 	public static void register() {

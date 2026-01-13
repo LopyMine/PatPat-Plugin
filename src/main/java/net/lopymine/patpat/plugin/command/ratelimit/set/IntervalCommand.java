@@ -66,7 +66,7 @@ public class IntervalCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.set.interval");
+		return StringUtils.commandPermission("ratelimit.set.interval");
 	}
 
 	@Override

@@ -15,4 +15,8 @@ public class StringUtils {
 		return "%s.%s".formatted(MOD_ID, permission);
 	}
 
+	public static String commandPermission(String permission) {
+		return "%s.command.%s".formatted(MOD_ID, permission);
+	}
+
 }

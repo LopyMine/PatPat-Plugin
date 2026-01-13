@@ -72,7 +72,7 @@ public class ListRemoveCommand implements ICommand {
 		if (config.remove(offlinePlayer.getUniqueId())) {
 			TranslatableComponent component = Component.translatable("patpat.command.list.remove.success")
 					.color(NamedTextColor.RED)
-					.args(nicknameComponent);
+					.arguments(nicknameComponent);
 
 			sender.sendMsg(component);
 			config.save();
@@ -90,7 +90,7 @@ public class ListRemoveCommand implements ICommand {
 		if (config.remove(nickname)) {
 			TranslatableComponent component = Component.translatable("patpat.command.list.remove.success")
 					.color(NamedTextColor.RED)
-					.args(nicknameComponent);
+					.arguments(nicknameComponent);
 
 			sender.sendMsg(component);
 			config.save();
@@ -101,7 +101,7 @@ public class ListRemoveCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("list.remove");
+		return StringUtils.commandPermission("list.remove");
 	}
 
 	@Override

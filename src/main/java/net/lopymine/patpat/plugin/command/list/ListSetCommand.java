@@ -56,7 +56,7 @@ public class ListSetCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("list.set");
+		return StringUtils.commandPermission("list.set");
 	}
 
 	@Override

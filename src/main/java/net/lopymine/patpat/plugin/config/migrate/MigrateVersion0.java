@@ -5,6 +5,7 @@ import com.google.gson.*;
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
+import net.lopymine.patpat.plugin.util.FileUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,25 +13,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
-public class MigrateVersion0 implements MigrateHandler {
+public class MigrateVersion0 {
 
 	private static final String OLD_CONFIG_FILENAME = "config.yml";
-
-	private boolean createBackup(File file) {
-		String filename = file.getName();
-		File backupFolder = MigrateManager.CONFIG_FOLDER.toPath().resolve("backup").toFile();
-		if ((!backupFolder.exists() || !backupFolder.isDirectory()) && !backupFolder.mkdir()) {
-			PatLogger.error("Failed to create PatPat Plugin backup folder");
-			return false;
-		}
-		try {
-			Files.copy(file.toPath(), backupFolder.toPath().resolve(filename + ".bkp"), StandardCopyOption.REPLACE_EXISTING);
-		} catch (Exception e) {
-			PatLogger.error("Failed to create backup for old config:", e);
-			return false;
-		}
-		return true;
-	}
 
 	@Nullable
 	public PlayerListConfig transformPlayerList(File oldFile) {
@@ -52,17 +37,15 @@ public class MigrateVersion0 implements MigrateHandler {
 		return playerListConfig;
 	}
 
-	@Override
 	public boolean needMigrate() {
-		File oldPlayerList = new File(MigrateManager.CONFIG_FOLDER, "player-list.json");
-		File oldConfig = new File(MigrateManager.CONFIG_FOLDER, OLD_CONFIG_FILENAME);
+		File oldPlayerList = new File(FileUtils.CONFIG_FOLDER, "player-list.json");
+		File oldConfig = new File(FileUtils.CONFIG_FOLDER, OLD_CONFIG_FILENAME);
 		return oldPlayerList.exists() || oldConfig.exists();
 	}
 
-	@Override
 	public boolean migrate() {
-		File oldConfig = new File(MigrateManager.CONFIG_FOLDER, OLD_CONFIG_FILENAME);
-		if (oldConfig.exists() && createBackup(oldConfig)) {
+		File oldConfig = new File(FileUtils.CONFIG_FOLDER, OLD_CONFIG_FILENAME);
+		if (oldConfig.exists() && FileUtils.backupFile(oldConfig)) {
 			try {
 				Files.delete(oldConfig.toPath());
 			} catch (Exception e) {
@@ -73,13 +56,13 @@ public class MigrateVersion0 implements MigrateHandler {
 		PatPatConfig config = new PatPatConfig();
 		config.save();
 
-		File oldPlayerList = new File(MigrateManager.CONFIG_FOLDER, "player-list.json");
+		File oldPlayerList = new File(FileUtils.CONFIG_FOLDER, "player-list.json");
 		if (!oldPlayerList.exists()) {
 			new PlayerListConfig().save();
 			return true;
 		}
 
-		if (!createBackup(oldPlayerList)) {
+		if (!FileUtils.backupFile(oldPlayerList)) {
 			PatLogger.error("Failed to create backup for PlayerListConfig:");
 			return false;
 		}
@@ -97,7 +80,6 @@ public class MigrateVersion0 implements MigrateHandler {
 		return true;
 	}
 
-	@Override
 	public String getVersion() {
 		return "0";
 	}

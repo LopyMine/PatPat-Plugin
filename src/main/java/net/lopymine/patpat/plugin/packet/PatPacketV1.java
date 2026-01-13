@@ -10,6 +10,7 @@ import net.lopymine.patpat.plugin.config.Version;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.util.StringUtils;
+import net.lopymine.patpat.plugin.util.UuidUtils;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -35,10 +36,10 @@ public class PatPacketV1 implements IPatPacket {
 	}
 
 	@Override
-	public PatPacket getPacket(Entity pattedEntity, Entity whoPattedEntity) {
+	public PatPacket getPacket(Entity pattedEntity, @Nullable Entity whoPattedEntity) {
 		ByteArrayDataOutput buf = ByteStreams.newDataOutput();
 		buf.writeUuid(pattedEntity.getUniqueId());
-		buf.writeUuid(whoPattedEntity.getUniqueId());
+		buf.writeUuid(whoPattedEntity != null ? whoPattedEntity.getUniqueId() : UuidUtils.ZERO);
 		return new PatPacket(buf.toByteArray(), PACKET_ID);
 	}
 

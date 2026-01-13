@@ -14,7 +14,7 @@ public interface IPatPacket {
 	@Nullable
 	Entity getPattedEntity(PatPlayer player, ByteArrayDataInput buf);
 
-	PatPacket getPacket(Entity pattedEntity, Entity whoPattedEntity);
+	PatPacket getPacket(Entity pattedEntity, @Nullable Entity whoPattedEntity);
 
 	String getPacketHandlerId();
 

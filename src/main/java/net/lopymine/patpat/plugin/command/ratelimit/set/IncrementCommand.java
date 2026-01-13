@@ -66,7 +66,7 @@ public class IncrementCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.set.increment");
+		return StringUtils.commandPermission("ratelimit.set.increment");
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class ReloadCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("reload");
+		return StringUtils.commandPermission("reload");
 	}
 
 	@Override

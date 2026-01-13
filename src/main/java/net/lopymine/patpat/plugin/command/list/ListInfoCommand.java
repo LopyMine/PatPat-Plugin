@@ -52,7 +52,7 @@ public class ListInfoCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("list.info");
+		return StringUtils.commandPermission("list.info");
 	}
 
 	@Override

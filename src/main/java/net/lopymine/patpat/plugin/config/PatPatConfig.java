@@ -1,7 +1,5 @@
 package net.lopymine.patpat.plugin.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +8,7 @@ import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.config.option.ListMode;
+import net.lopymine.patpat.plugin.util.JsonUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,11 +18,7 @@ import org.jetbrains.annotations.Nullable;
 @Setter
 public class PatPatConfig {
 
-	private static final String FILENAME = "config.json";
-	private static final Gson GSON = new GsonBuilder()
-			.setPrettyPrinting()
-			.disableHtmlEscaping()
-			.create();
+	public static final String FILENAME = "config.json";
 
 	@Getter
 	private static PatPatConfig instance;
@@ -34,12 +29,14 @@ public class PatPatConfig {
 
 	private ListMode listMode;
 	private RateLimitConfig rateLimit;
+	private PermissionConfig permissionRestrictions;
 
 	public PatPatConfig() {
-		this.listMode  = ListMode.DISABLED;
-		this.rateLimit = new RateLimitConfig();
-		this.info      = new InfoConfig();
-		this.debug     = false;
+		this.listMode               = ListMode.DISABLED;
+		this.rateLimit              = new RateLimitConfig();
+		this.info                   = new InfoConfig();
+		this.permissionRestrictions = new PermissionConfig();
+		this.debug                  = false;
 	}
 
 	public static void reload() {
@@ -48,12 +45,22 @@ public class PatPatConfig {
 			instance = create();
 		}
 
-		try (FileReader reader = new FileReader(configPath)) {
-			instance = GSON.fromJson(reader, PatPatConfig.class);
+		instance = readFile(configPath);
+		if (instance == null) {
+			PatLogger.error("Failed to reload PatPatConfig: instance is null");
+			return;
+		}
+		RateLimitManager.reloadTask();
+	}
+
+	@Nullable
+	public static PatPatConfig readFile(File file) {
+		try (FileReader reader = new FileReader(file)) {
+			return JsonUtils.GSON.fromJson(reader, PatPatConfig.class);
 		} catch (Exception e) {
 			PatLogger.error("Failed to read PatPatConfig:", e);
 		}
-		RateLimitManager.reloadTask();
+		return null;
 	}
 
 	private static File getConfigPath() {
@@ -62,7 +69,7 @@ public class PatPatConfig {
 
 	public void save() {
 		info.reset();
-		String json = GSON.toJson(this, PatPatConfig.class);
+		String json = JsonUtils.GSON.toJson(this, PatPatConfig.class);
 		try (FileWriter writer = new FileWriter(getConfigPath())) {
 			writer.write(json);
 		} catch (Exception e) {
@@ -86,7 +93,7 @@ public class PatPatConfig {
 		if (json == null) {
 			return null;
 		}
-		PatPatConfig config = GSON.fromJson(json, PatPatConfig.class);
+		PatPatConfig config = JsonUtils.GSON.fromJson(json, PatPatConfig.class);
 		try (FileWriter writer = new FileWriter(getConfigPath())) {
 			writer.write(json);
 		} catch (Exception e) {
