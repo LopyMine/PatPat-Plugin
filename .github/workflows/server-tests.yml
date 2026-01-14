@@ -7,9 +7,10 @@ jobs:
   server-tests:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
         kernel: [ paper, bukkit, spigot]
-        version: [ '1.16.5', '1.21.1' ]
+        version: [ '1.16.5', '1.20.4', '1.21.1', '1.21.11' ]
     env:
       SERVER_FOLDER: ${{ matrix.kernel }}_${{ matrix.version }}
     steps:

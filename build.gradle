@@ -121,7 +121,7 @@ tasks.shadowJar {
 	from("patpat-languages-files/lang") {
 		into "lang"
 	}
-	relocate 'net.kyori', 'shaded.net.kyori'
+	//relocate 'net.kyori', 'shaded.net.kyori'
 
 	destinationDirectory = file("$rootDir/libs")
 }
