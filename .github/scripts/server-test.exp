@@ -4,11 +4,11 @@ spawn ./start.sh
 set timeout 90
 
 expect {
-    -exact { INFO]: Done } {
+    " INFO\]: Done " {
         puts "Server loaded"
         send "patpat info\n"
         expect {
-            -exact {[PatPat] Platform: } {
+            "\[PatPat\] Platform: " {
                 exit 0
             }
             timeout
