@@ -10,7 +10,7 @@ jobs:
       - name: download plugin
         uses: actions/download-artifact@v4
         with:
-          name: plugin-jar
+          name: plugin
           path: ./
       - name: check plugin
         run: ls
