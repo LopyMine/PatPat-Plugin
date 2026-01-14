@@ -25,7 +25,8 @@ jobs:
           path: build/reports/
       - name: Check if jar exists
         run: if ! [ -f libs/*.jar ]; then exit 1; fi
-
+      - name: Check plugin size
+        run: ls libs/
       - name: Upload reports on failure
         uses: actions/upload-artifact@v4
         with:
