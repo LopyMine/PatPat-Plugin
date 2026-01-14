@@ -26,16 +26,16 @@ jobs:
       - run: ls -lsa .
       - name: copy test in server folder
         run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
-      - name: move to server folder
-        run: cd ./$SERVER_FOLDER/
-      - run: ls -lsa .
       - name: make scripts executable
+        working-directory: ./${{ env.SERVER_FOLDER }}
         run: |
           chmod +x *.sh
           chmod +x *.exp
       - name: check server folder
+        working-directory: ./${{ env.SERVER_FOLDER }}
         run: ls -lsa .
       - name: run test
+        working-directory: ./${{ env.SERVER_FOLDER }}
         run: ./server-test.exp
 
 
