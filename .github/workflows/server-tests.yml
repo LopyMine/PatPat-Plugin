@@ -20,6 +20,8 @@ jobs:
         with:
           name: plugin
           path: ./$SERVER_FOLDER/plugins/
+      - name: install dependencies
+        run: sudo apt install expect openjdk-21-jre -y
       - name: copy test in server folder
         run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
       - name: make scripts executable
