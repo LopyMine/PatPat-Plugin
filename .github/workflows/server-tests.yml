@@ -28,6 +28,7 @@ jobs:
         run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
       - name: move to server folder
         run: cd ./$SERVER_FOLDER/
+      - run: ls -lsa .
       - name: make scripts executable
         run: |
           chmod +x *.sh
