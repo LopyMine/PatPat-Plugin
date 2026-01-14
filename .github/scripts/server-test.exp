@@ -1,10 +1,10 @@
 #!/usr/bin/expect
 
 spawn ./start.sh
-set timeout 90
+set timeout 60
 
 expect {
-    " INFO\]: Done " {
+    " INFO]: Done " {
         puts "Server loaded"
         send "patpat info\n"
         expect {
