@@ -50,7 +50,7 @@ jobs:
         run: ls -lsa .
       - name: run test
         working-directory: ./${{ env.SERVER_FOLDER }}
-        run: ./server-tests.yml
+        run: ./server-test.exp
 
 
 
