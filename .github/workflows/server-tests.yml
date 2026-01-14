@@ -7,11 +7,12 @@ jobs:
   server-tests:
     runs-on: ubuntu-22.04
     steps:
+      - run: mkdir plugins_folder
       - name: download plugin
         uses: actions/download-artifact@v4
         with:
           name: plugin
-          path: ./
+          path: ./plugins_folder/
       - name: check plugin
         run: ls
 
