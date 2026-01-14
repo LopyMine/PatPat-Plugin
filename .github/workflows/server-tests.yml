@@ -6,15 +6,22 @@ on:
 jobs:
   server-tests:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        kernel: [ paper, bukkit, spigot]
+        version: [ '1.16.5', '1.21.1' ]
     steps:
-      - run: mkdir plugins_folder
+      - name: install server
+        run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ matrix.version }} --kernel ${{ matrix.kernel }}
       - name: download plugin
         uses: actions/download-artifact@v4
         with:
           name: plugin
-          path: ./plugins_folder/
+          path: ./${{ matrix.kernel }}_${{ matrix.version }}/
       - name: check plugin
-        run:  ./plugins_folder/
+        run:  ./${{ matrix.kernel }}_${{ matrix.version }}/
+
+
 
 #      - uses: actions/checkout@v4
 #      - uses: gradle/actions/setup-gradle@v4
