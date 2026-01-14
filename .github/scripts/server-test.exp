@@ -4,7 +4,7 @@ spawn ./start.sh
 set timeout 90
 
 expect {
-    "Done" {
+    " INFO]: Done " {
         puts "Server loaded"
         send "patpat info\n"
         expect {
