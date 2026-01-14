@@ -14,7 +14,7 @@ jobs:
           name: plugin
           path: ./plugins_folder/
       - name: check plugin
-        run: ls
+        run:  ./plugins_folder/
 
 #      - uses: actions/checkout@v4
 #      - uses: gradle/actions/setup-gradle@v4
