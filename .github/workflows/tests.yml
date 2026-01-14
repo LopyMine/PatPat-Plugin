@@ -4,9 +4,9 @@ name: tests
 on: [pull_request, push]
 
 jobs:
-  internal-tests:
+  build:
     uses: ./.github/workflows/build.yml
 
-#  server-tests:
-#    needs: internal-tests
-#    uses: ./.github/workflows/server-tests.yml
+  server-tests:
+    needs: build
+    uses: ./.github/workflows/server-tests.yml
