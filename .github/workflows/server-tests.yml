@@ -38,20 +38,38 @@ jobs:
         with:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
-      - run: ls -lsa .
-      - name: copy test in server folder
-        run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
       - name: make scripts executable
         working-directory: ./${{ env.SERVER_FOLDER }}
-        run: |
-          chmod +x *.sh
-          chmod +x *.exp
+        run: chmod +x *.sh
       - name: check server folder
         working-directory: ./${{ env.SERVER_FOLDER }}
         run: ls -lsa .
       - name: run test
         working-directory: ./${{ env.SERVER_FOLDER }}
-        run: ./server-test.exp
+        run: |
+          expect <<'EOF'
+          spawn ./start.sh
+          set timeout 90
+          
+          expect {
+            "Done" { }
+            timeout
+            eof {
+              puts "ERROR: server is not launched"
+                exit 1
+            }
+          }
+          send "patpat info\n"
+          expect {
+            "[PatPat] Platform: " {
+              exit 0
+            }
+            timeout
+            eof {
+              puts "ERROR: server is not launched"
+              exit 1
+            }
+          }
 
 
 
