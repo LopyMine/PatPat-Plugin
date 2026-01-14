@@ -21,7 +21,7 @@ jobs:
           name: plugin
           path: ./$SERVER_FOLDER/plugins/
       - name: copy test in server folder
-        run: cp .github.scripts.server-test.exp ./$SERVER_FOLDER/
+        run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
       - name: make scripts executable
         run: |
           chmod +x *.sh
