@@ -5,4 +5,4 @@ on: [pull_request, push]
 
 jobs:
   internal-tests:
-    uses: ./tests/internal-tests.yml
+    uses: ./.github/workflows/tests/internal-tests.yml
