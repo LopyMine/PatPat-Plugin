@@ -14,7 +14,7 @@ jobs:
       SERVER_FOLDER: ${{ matrix.kernel }}_${{ matrix.version }}
     steps:
       - uses: actions/checkout@v4
-      - name: Select Java version
+      - name: select java version
         run: |
           MC_VERSION="${{ matrix.version }}"
 

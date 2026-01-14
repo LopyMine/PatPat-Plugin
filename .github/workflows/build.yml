@@ -46,7 +46,10 @@ jobs:
           name: reports
           path: build/reports/
       - name: Check if jar exists
-        run: if ! [ -f libs/*.jar ]; then exit 1; fi
+        run: |
+          shopt -s nullglob
+          jars=(libs/*.jar)
+          (( ${#jars[@]} > 0 )) || exit 1
       - name: Upload reports on failure
         uses: actions/upload-artifact@v4
         with:
