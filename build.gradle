@@ -115,9 +115,8 @@ jar {
 }
 
 tasks.shadowJar {
-	archiveClassifier.set("")
-
 	dependsOn test
+	archiveClassifier.set("")
 
 	exclude 'META-INF/**'
 	from("patpat-languages-files/lang") {
@@ -162,26 +161,6 @@ processResources {
 		expand(props)
 	}
 }
-
-tasks.register('copyPluginJar', Copy) {
-	dependsOn shadowJar
-	onlyIf { project.hasProperty('outputDir') }
-
-	from shadowJar.archiveFile
-	into file(project.findProperty('outputDir') ?: 'undefined')
-
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-	doFirst {
-		def targetDir = file(project.outputDir)
-		if (!targetDir.exists()) {
-			targetDir.mkdirs()
-		}
-		println "Copy JAR in: ${targetDir.absolutePath}"
-	}
-}
-build.finalizedBy copyPluginJar
-shadowJar.finalizedBy copyPluginJar
 
 publishMods {
 	def loaders = prop("loaders").toString().split(" ")
