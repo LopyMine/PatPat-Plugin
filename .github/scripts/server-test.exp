@@ -43,7 +43,7 @@ proc expect_str {str okMsg errMsg {timeoutSec 10}} {
 
 spawn ./start.sh
 
-expect_str " INFO]: Done " \
+expect_str "INFO]: Done " \
     "Server loaded" \
     "ERROR: server is not launched" \
     60
