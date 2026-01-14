@@ -52,24 +52,27 @@ jobs:
           set timeout 90
           
           expect {
-            "Done" { }
+            "Done" {
+              puts "Server loaded"
+              send "patpat info\n"
+              expect {
+                "[PatPat] Platform: " {
+                  exit 0
+                }
+                timeout
+                eof {
+                  puts "ERROR: server is not launched"
+                  exit 1
+                }
+              }
+            }
             timeout
             eof {
               puts "ERROR: server is not launched"
                 exit 1
             }
           }
-          send "patpat info\n"
-          expect {
-            "[PatPat] Platform: " {
-              exit 0
-            }
-            timeout
-            eof {
-              puts "ERROR: server is not launched"
-              exit 1
-            }
-          }
+
 
 
 
