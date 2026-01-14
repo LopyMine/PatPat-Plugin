@@ -13,6 +13,7 @@ jobs:
     env:
       SERVER_FOLDER: ${{ matrix.kernel }}_${{ matrix.version }}
     steps:
+      - uses: actions/checkout@v4
       - name: install server
         run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ matrix.version }} --kernel ${{ matrix.kernel }}
       - name: download plugin
@@ -22,6 +23,7 @@ jobs:
           path: ./$SERVER_FOLDER/plugins/
       - name: install dependencies
         run: sudo apt install expect openjdk-21-jre -y
+      - run: ls -lsa .
       - name: copy test in server folder
         run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
       - name: make scripts executable
