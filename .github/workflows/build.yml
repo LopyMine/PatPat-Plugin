@@ -1,10 +1,10 @@
-name: Internal MockBukkit Tests
+name: Build plugin with MockBukkit tests
 
 on:
   workflow_call:
 
 jobs:
-  gradle-test:
+  build:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -17,11 +17,11 @@ jobs:
         run: chmod +x ./gradlew
       - name: build
         run: ./gradlew shadowJar
-      - name: Upload test reports on failure
+      - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: tests-reports
+          name: reports
           path: build/reports/
       - name: Check if jar exists
-        run: if [ -f build/libs/*.jar ]; then; exit 1; fi
+        run: if [ -f build/libs/*.jar ]; then exit 1; fi
