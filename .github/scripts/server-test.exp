@@ -1,0 +1,21 @@
+#!/usr/bin/expect
+
+spawn ./start.sh
+set timeout 90
+
+expect {
+    "Done" {
+        send "stop\n"
+        expect eof
+        puts "Worked"
+        exit 0
+    }
+    timeout {
+        puts "ERROR: server is not launched"
+        exit 1
+    }
+    eof {
+        puts "ERROR: server is not launched"
+        exit 1
+    }
+}

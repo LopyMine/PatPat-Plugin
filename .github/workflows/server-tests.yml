@@ -10,6 +10,8 @@ jobs:
       matrix:
         kernel: [ paper, bukkit, spigot]
         version: [ '1.16.5', '1.21.1' ]
+    env:
+      SERVER_FOLDER: ${{ matrix.kernel }}_${{ matrix.version }}
     steps:
       - name: install server
         run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ matrix.version }} --kernel ${{ matrix.kernel }}
@@ -17,9 +19,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: plugin
-          path: ./${{ matrix.kernel }}_${{ matrix.version }}/
-      - name: check plugin
-        run:  ./${{ matrix.kernel }}_${{ matrix.version }}/
+          path: ./$SERVER_FOLDER/plugins/
+      - name: copy test in server folder
+        run: cp .github.scripts.server-test.exp ./$SERVER_FOLDER/
+      - name: make scripts executable
+        run: |
+          chmod +x *.sh
+          chmod +x *.exp
+      - name: move to server folder
+        run: cd ./$SERVER_FOLDER/
+      - name: check server folder
+        run: ls -lsa .
+      - name: run test
+        run: ./server-test.exp
 
 
 
