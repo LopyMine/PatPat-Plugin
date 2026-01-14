@@ -20,18 +20,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: plugin
-          path: ./$SERVER_FOLDER/plugins/
+          path: ./${{ env.SERVER_FOLDER }}/plugins/
       - name: install dependencies
         run: sudo apt install expect openjdk-21-jre -y
       - run: ls -lsa .
       - name: copy test in server folder
         run: cp .github/scripts/server-test.exp ./$SERVER_FOLDER/
+      - name: move to server folder
+        run: cd ./$SERVER_FOLDER/
       - name: make scripts executable
         run: |
           chmod +x *.sh
           chmod +x *.exp
-      - name: move to server folder
-        run: cd ./$SERVER_FOLDER/
       - name: check server folder
         run: ls -lsa .
       - name: run test
