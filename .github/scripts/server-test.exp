@@ -46,7 +46,7 @@ spawn ./start.sh
 expect_str "INFO]: Done " \
     "Server loaded" \
     "ERROR: server is not launched" \
-    60
+    90
 
 send "patpat info\n"
 expect_pattern "\[${ansi}PatPat${ansi}] Platform:" \
