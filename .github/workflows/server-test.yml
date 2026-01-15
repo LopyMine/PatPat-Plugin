@@ -1,23 +1,27 @@
-name: Run plugin on servers
+name: Run plugin on server
 
 on:
   workflow_call:
+    inputs:
+      version:
+        description: 'Version minecraft server, where will testing plugin (like 1.21.11)'
+        required: true
+        type: string
+      kernel:
+        description: 'Version minecraft server, where will testing plugin (bukkit, spigot, paper)'
+        required: true
+        type: string
 
 jobs:
   server-tests:
     runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        kernel: [ paper, bukkit, spigot]
-        version: [ '1.16.5', '1.20.4', '1.21.1', '1.21.11' ]
     env:
-      SERVER_FOLDER: ${{ matrix.kernel }}_${{ matrix.version }}
+      SERVER_FOLDER: ${{ inputs.kernel }}_${{ inputs.version }}
     steps:
       - uses: actions/checkout@v4
       - name: select java version
         run: |
-          MC_VERSION="${{ matrix.version }}"
+          MC_VERSION="${{ inputs.version }}"
 
           MAJOR=$(echo "$MC_VERSION" | cut -d. -f2)
 
@@ -33,7 +37,7 @@ jobs:
       - name: install dependency
         run: sudo apt install expect -y
       - name: install server
-        run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ matrix.version }} --kernel ${{ matrix.kernel }}
+        run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ inputs.version }} --kernel ${{ inputs.kernel }}
       - name: download plugin
         uses: actions/download-artifact@v4
         with:
