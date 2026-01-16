@@ -75,6 +75,9 @@ await test1()
 await test2()
 
 console.log('Tests passed')
+setTimeout(() => {
+  process.exit(0)
+}, 4000)
 
 // // Export classes
 // export { PatPatBotV1, PatPatBotV2, Utils }

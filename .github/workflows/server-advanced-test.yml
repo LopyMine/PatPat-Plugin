@@ -1,4 +1,4 @@
-name: Run plugin on server and test one working
+name: Run server and connect clients for advanced test
 
 on:
   workflow_call:
@@ -13,7 +13,7 @@ on:
         type: string
 
 jobs:
-  server-basic-test:
+  server-advanced-test:
     runs-on: ubuntu-22.04
     env:
       SERVER_FOLDER: ${{ inputs.kernel }}_${{ inputs.version }}
@@ -32,8 +32,14 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
-      - name: install dependency
-        run: sudo apt install expect -y
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: '.github/scripts/node/package-lock.json'
+      - name: install npm dependencies
+        working-directory: ./.github/scripts/node
+        run: npm ci
       - name: install server
         run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ inputs.version }} --kernel ${{ inputs.kernel }}
       - name: download plugin
@@ -41,16 +47,20 @@ jobs:
         with:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
-      - name: copy tests in server folder
-        run: cp -r .github/scripts/* ./$SERVER_FOLDER/
-      - name: make scripts executable
+      - name: copy server.properties in server folder
+        run: cp .github/templates/server.properties ./$SERVER_FOLDER/
+      - name: run server
         working-directory: ./${{ env.SERVER_FOLDER }}
         run: |
-          chmod +x *.sh
-          chmod +x *.exp
-      - name: check server folder
-        working-directory: ./${{ env.SERVER_FOLDER }}
-        run: ls -lsa .
-      - name: run test
-        working-directory: ./${{ env.SERVER_FOLDER }}
-        run: ./server-test.exp
+          nohup ./start.sh > server.log 2>&1 &
+          echo $! > server.pid
+          
+          tail -f server.log | while read line; do
+            echo "$line"
+            if echo "$line" | grep -q "INFO]: Done "; then
+              break
+            fi
+          done
+      - name: run tests
+        working-directory: ./.github/scripts/node
+        run: node test.js
