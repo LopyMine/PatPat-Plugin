@@ -5,11 +5,17 @@ import { MyRcon } from './rcon.js'
 async function test1(rcon) {
   try {
     const bot1 = new PatPatBotV2('Bot1')
-    bot1.waitPacket(HELLO_PACKET_V2_S2C, 15000)
+    bot1.waitPacket(HELLO_PACKET_V2_S2C, 2000)
     await bot1.connect()
     bot1.printStatus()
+    function sleep(ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
+    }
+    await sleep(1000)
     const bot2 = new PatPatBotV2('Bot2')
-    bot2.waitPacket(HELLO_PACKET_V2_S2C, 15000)
+    bot2.waitPacket(HELLO_PACKET_V2_S2C, 30000)
     await bot2.connect()
     bot2.printStatus()
 
