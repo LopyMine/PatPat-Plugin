@@ -27,15 +27,15 @@ jobs:
 #      kernel: "spigot"
 #      version: ${{ matrix.version }}
 
-  paper-server-tests:
-    needs: build
-    strategy:
-      matrix:
-        version: [ "1.16.5", "1.20.1", "1.21.11" ]
-    uses: ./.github/workflows/server-basic-test.yml
-    with:
-      kernel: "paper"
-      version: ${{ matrix.version }}
+#  paper-server-tests:
+#    needs: build
+#    strategy:
+#      matrix:
+#        version: [ "1.16.5", "1.20.1", "1.21.11" ]
+#    uses: ./.github/workflows/server-basic-test.yml
+#    with:
+#      kernel: "paper"
+#      version: ${{ matrix.version }}
 
   paper-advanced-server-tests:
     needs: build

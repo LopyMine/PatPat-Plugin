@@ -35,11 +35,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: 'npm'
-          cache-dependency-path: '.github/scripts/node/package-lock.json'
+#          cache: 'npm'
+#          cache-dependency-path: '.github/scripts/node/package-lock.json'
       - name: install npm dependencies
         working-directory: ./.github/scripts/node
-        run: npm ci
+        run: npm install
       - name: install server
         run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ inputs.version }} --kernel ${{ inputs.kernel }}
       - name: download plugin
