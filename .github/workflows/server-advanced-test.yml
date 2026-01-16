@@ -65,3 +65,9 @@ jobs:
       - name: run tests
         working-directory: ./.github/scripts/node
         run: node test.js
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: ${{ env.SERVER_FOLDER }}/server.log
