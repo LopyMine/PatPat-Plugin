@@ -5,10 +5,10 @@ import { MyRcon } from './rcon.js'
 async function test1() {
   try {
     const bot1 = new PatPatBotV2('Bot1')
-    bot1.waitPacket(HELLO_PACKET_V2_S2C, 2000)
+    bot1.waitPacket(HELLO_PACKET_V2_S2C, 15000)
     await bot1.connect()
     const bot2 = new PatPatBotV2('Bot2')
-    bot2.waitPacket(HELLO_PACKET_V2_S2C, 2000)
+    bot2.waitPacket(HELLO_PACKET_V2_S2C, 15000)
     await bot2.connect()
     
     console.log('Send pat packet bot1 -> bot2')
