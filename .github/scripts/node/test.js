@@ -4,18 +4,12 @@ import { MyRcon } from './rcon.js'
 // Test pat work v2 <-> v2
 async function test1(rcon) {
   try {
-    const bot1 = new PatPatBotV2('Bot1', {
-      host: '127.0.0.1',
-      port: 25565
-    })
+    const bot1 = new PatPatBotV2('Bot1')
     bot1.waitPacket(HELLO_PACKET_V2_S2C, 2000)
     await bot1.connect()
     bot1.printStatus()
-    const bot2 = new PatPatBotV2('Bot2', {
-      host: '127.0.0.1',
-      port: 25565
-    })
-    bot2.waitPacket(HELLO_PACKET_V2_S2C, 30000)
+    const bot2 = new PatPatBotV2('Bot2')
+    bot2.waitPacket(HELLO_PACKET_V2_S2C, 2000)
     await bot2.connect()
     bot2.printStatus()
 

@@ -41,6 +41,8 @@ jobs:
         with:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
+      - name: move server.properties in server folder
+        run: mv .github/templates/basic-test.properties ./$SERVER_FOLDER/server.properties
       - name: copy tests in server folder
         run: cp -r .github/scripts/* ./$SERVER_FOLDER/
       - name: make scripts executable

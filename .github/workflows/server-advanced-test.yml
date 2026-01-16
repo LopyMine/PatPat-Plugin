@@ -47,8 +47,8 @@ jobs:
         with:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
-      - name: copy server.properties in server folder
-        run: cp .github/templates/server.properties ./$SERVER_FOLDER/
+      - name: move server.properties in server folder
+        run: mv .github/templates/advanced-test.properties ./$SERVER_FOLDER/server.properties
       - name: run server
         working-directory: ./${{ env.SERVER_FOLDER }}
         run: |
