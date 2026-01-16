@@ -6,10 +6,10 @@ import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
 import net.lopymine.patpat.plugin.util.FileUtils;
+import net.lopymine.patpat.plugin.util.JsonUtils;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ public class MigrateVersion0 {
 	public PlayerListConfig transformPlayerList(File oldFile) {
 		PlayerListConfig playerListConfig = new PlayerListConfig();
 		try (FileReader reader = new FileReader(oldFile)) {
-			JsonObject rootObj = JsonParser.parseReader(reader).getAsJsonObject();
+			JsonObject rootObj = JsonUtils.parseReader(reader).getAsJsonObject();
 			JsonArray array = rootObj.get("uuids").getAsJsonArray();
 			for (JsonElement element : array) {
 				String uuid = element.getAsString();

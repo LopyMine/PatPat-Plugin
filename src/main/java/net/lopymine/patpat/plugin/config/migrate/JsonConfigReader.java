@@ -18,7 +18,7 @@ public class JsonConfigReader {
 
 	public ReadStatus readConfig() {
 		try (FileReader fileReader = new FileReader(config)) {
-			json = JsonParser
+			json = JsonUtils
 					.parseReader(fileReader)
 					.getAsJsonObject();
 		} catch (FileNotFoundException e) {
