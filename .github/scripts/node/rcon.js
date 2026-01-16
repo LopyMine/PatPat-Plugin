@@ -68,12 +68,6 @@ class MyRcon {
     }
 }
 
-
-// rcon1.conn.on('response', function (str) {
-//     console.log("Response: " + str);
-// });
-// rcon1.conn.send('patpat info')
-
 export {
     MyRcon
 }
