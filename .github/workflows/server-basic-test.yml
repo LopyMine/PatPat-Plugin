@@ -44,7 +44,7 @@ jobs:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
       - name: copy tests in server folder
-        run: cp .github/scripts/* ./$SERVER_FOLDER/
+        run: cp -r .github/scripts/* ./$SERVER_FOLDER/
       - name: make scripts executable
         working-directory: ./${{ env.SERVER_FOLDER }}
         run: |
