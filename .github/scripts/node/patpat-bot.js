@@ -109,7 +109,7 @@ class PatPatBot extends EventEmitter {
     this.bot._client.on('packet', (data, meta) => {
       if (meta.name !== 'custom_payload' || !data.channel.startsWith('patpat')) return
       this.handlePacket(data)
-      this.emit(`packet:${data.channel}`, data)
+      this.emit(`packet:${this.username}:${data.channel}`, data)
     })
   }
 
@@ -120,7 +120,7 @@ class PatPatBot extends EventEmitter {
   async waitPacket(channel, timeout = 5000) {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        this.removeListener(`packet:${channel}`, handler)
+        this.removeListener(`packet:${this.username}:${channel}`, handler)
         reject(new Error(`[${this.username}] Timeout waiting for packet: ${channel}`))
       }, timeout)
 
@@ -129,7 +129,7 @@ class PatPatBot extends EventEmitter {
         resolve(data)
       }
 
-      this.once(`packet:${channel}`, handler)
+      this.once(`packet:${this.username}:${channel}`, handler)
     })
   }
 
