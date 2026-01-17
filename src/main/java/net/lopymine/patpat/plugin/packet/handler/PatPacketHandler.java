@@ -7,10 +7,10 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 import org.bukkit.util.BoundingBox;
+import ru.nik51.patpat.plugin.api.event.PatPacketReceiveEvent;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
-import net.lopymine.patpat.plugin.api.event.PatPacketReceiveEvent;
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;
@@ -185,7 +185,7 @@ public class PatPacketHandler implements IPacketHandler {
 	private boolean canHandle(Player sender) {
 		UUID senderUuid = sender.getUniqueId();
 		PatPatConfig config = PatPatConfig.getInstance();
-		if(config.getPermissionRestrictions().isEnabled() && !sender.hasPermission(config.getPermissionRestrictions().getPermissionForPat())) {
+		if (config.getPermissionRestrictions().isEnabled() && !sender.hasPermission(config.getPermissionRestrictions().getPermissionForPat())) {
 			return false;
 		}
 

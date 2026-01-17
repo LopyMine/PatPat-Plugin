@@ -5,8 +5,8 @@ import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.nik51.patpat.plugin.api.PatPatPluginAPI;
 
-import net.lopymine.patpat.plugin.api.PatPatPluginAPI;
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.PlayerListConfig;

@@ -18,29 +18,6 @@ base {
 	archivesName = prop("plugin_id")
 }
 
-allprojects {
-	repositories {
-		mavenCentral()
-		maven {
-			name = "spigotmc-repo"
-			url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-		}
-	}
-
-
-	java {
-		sourceCompatibility = mainJavaVersion
-		targetCompatibility = mainJavaVersion
-		if (JavaVersion.current() < mainJavaVersion) {
-			toolchain.languageVersion = JavaLanguageVersion.of(mainJava)
-		}
-	}
-	tasks.withType(JavaCompile) {
-		options.encoding = 'UTF-8'
-		options.release = mainJava as int
-	}
-}
-
 repositories {
 	mavenCentral()
 	maven {
@@ -55,28 +32,9 @@ repositories {
 		name = "papermc-repo"
 		url = "https://repo.papermc.io/repository/maven-public/"
 	}
-
-}
-
-subprojects {
-	apply plugin: 'java'
-
-	dependencies {
-		// Spigot API
-		compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
-
-//		// Lombok
-//		compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
-//		annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
-
-		// Jetbrains Annotations
-		compileOnly("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
-	}
 }
 
 dependencies {
-	implementation(project(":api"))
-
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
@@ -89,11 +47,16 @@ dependencies {
 	// Adventure-API
 	implementation("net.kyori:adventure-platform-bukkit:${prop("adventure-platform-bukkit")}")
 
+	// PatPat API
+	implementation("ru.nik51:patpat-plugin-api:1.0.0")
+
 	testImplementation('ch.qos.logback:logback-classic:1.5.18')
 	testImplementation(platform('org.junit:junit-bom:5.12.2'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
+
+
 }
 
 java {

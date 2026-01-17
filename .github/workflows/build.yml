@@ -1,6 +1,6 @@
 name: Build plugin with MockBukkit tests
 
-on: [pull_request, workflow_call]
+on: [push, workflow_call]
 
 jobs:
   test:

@@ -2,8 +2,8 @@ package net.lopymine.patpat.plugin;
 
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import ru.nik51.patpat.plugin.api.PatPatPluginAPI;
 
-import net.lopymine.patpat.plugin.api.PatPatPluginAPI;
 import net.lopymine.patpat.plugin.packet.handler.PatPacketHandler;
 
 import org.jetbrains.annotations.Nullable;
