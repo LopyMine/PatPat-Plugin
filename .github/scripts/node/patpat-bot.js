@@ -11,7 +11,6 @@ const PAT_PACKET_V2_S2C = 'patpat:pat_entity_s2c_packet_v2'
 const HELLO_PACKET_V2_S2C = 'patpat:hello_patpat_player_s2c_packet'
 const HELLO_PACKET_V2_C2S = 'patpat:hello_patpat_server_c2s_packet'
 
-// Utility functions
 class Utils {
   static longsToUuid(msb, lsb) {
     const hex = (msb << 64n | (lsb & 0xFFFFFFFFFFFFFFFFn))
@@ -61,7 +60,6 @@ class Utils {
   }
 }
 
-// Base PatPat Bot class
 class PatPatBot extends EventEmitter {
   constructor(username, options = {}) {
     super()
@@ -213,7 +211,6 @@ class PatPatBotV1 extends PatPatBot {
   }
 }
 
-// V2 Bot - uses entity ID-based packets
 class PatPatBotV2 extends PatPatBot {
   constructor(username, options = {}) {
     super(username, options)

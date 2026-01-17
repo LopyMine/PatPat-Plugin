@@ -76,12 +76,7 @@ console.log('Server prepare')
 setTimeout(() => rcon1.conn.send('patpat info'), 100)
 await rcon1.waitResponse(1000, 'Platform:', 'Minecraft Version:', 'Version:')
 console.log('Plugin work')
-// function sleep(ms) {
-//   return new Promise((resolve) => {
-//     setTimeout(resolve, ms);
-//   });
-// }
-// await sleep(300)
+
 await test1(rcon1)
 await test2(rcon1)
 
@@ -89,6 +84,3 @@ console.log('Tests passed')
 setTimeout(() => {
   process.exit(0)
 }, 4000)
-
-// // Export classes
-// export { PatPatBotV1, PatPatBotV2, Utils }
