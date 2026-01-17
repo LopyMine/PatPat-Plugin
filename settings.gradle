@@ -7,5 +7,3 @@ pluginManagement {
 }
 
 rootProject.name = plugin_name
-
-include "api"

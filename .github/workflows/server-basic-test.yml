@@ -1,0 +1,58 @@
+name: Run plugin on server and test one working
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version minecraft server, where will testing plugin (like 1.21.11)'
+        required: true
+        type: string
+      kernel:
+        description: 'Version minecraft server, where will testing plugin (bukkit, spigot, paper)'
+        required: true
+        type: string
+
+jobs:
+  server-basic-test:
+    runs-on: ubuntu-22.04
+    env:
+      SERVER_FOLDER: ${{ inputs.kernel }}_${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: select java version
+        run: |
+          MC_VERSION="${{ inputs.version }}"
+          MAJOR=$(echo "$MC_VERSION" | cut -d. -f2)
+          if [ "$MAJOR" -le 16 ]; then
+            echo "JAVA_VERSION=16" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      - name: install dependency
+        run: sudo apt install expect -y
+      - name: install server
+        run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ inputs.version }} --kernel ${{ inputs.kernel }}
+      - name: download plugin
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin
+          path: ./${{ env.SERVER_FOLDER }}/plugins/
+      - name: move server.properties in server folder
+        run: mv .github/templates/basic-test.properties ./$SERVER_FOLDER/server.properties
+      - name: copy tests in server folder
+        run: cp -r .github/scripts/* ./$SERVER_FOLDER/
+      - name: make scripts executable
+        working-directory: ./${{ env.SERVER_FOLDER }}
+        run: |
+          chmod +x *.sh
+          chmod +x *.exp
+      - name: check server folder
+        working-directory: ./${{ env.SERVER_FOLDER }}
+        run: ls -lsa .
+      - name: run test
+        working-directory: ./${{ env.SERVER_FOLDER }}
+        run: ./server-test.exp

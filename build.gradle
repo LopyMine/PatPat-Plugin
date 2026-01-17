@@ -3,7 +3,7 @@ import me.modmuss50.mpp.ReleaseType
 plugins {
 	id("java")
 	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
-	id("com.gradleup.shadow") version "9.3.1"
+	id("com.gradleup.shadow") version "9.1.0"
 }
 
 group = prop("plugin_maven_group")
@@ -16,29 +16,6 @@ def mainJavaVersion = JavaVersion.toVersion(mainJava)
 
 base {
 	archivesName = prop("plugin_id")
-}
-
-allprojects {
-	repositories {
-		mavenCentral()
-		maven {
-			name = "spigotmc-repo"
-			url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-		}
-	}
-
-
-	java {
-		sourceCompatibility = mainJavaVersion
-		targetCompatibility = mainJavaVersion
-		if (JavaVersion.current() < mainJavaVersion) {
-			toolchain.languageVersion = JavaLanguageVersion.of(mainJava)
-		}
-	}
-	tasks.withType(JavaCompile) {
-		options.encoding = 'UTF-8'
-		options.release = mainJava as int
-	}
 }
 
 repositories {
@@ -55,28 +32,9 @@ repositories {
 		name = "papermc-repo"
 		url = "https://repo.papermc.io/repository/maven-public/"
 	}
-
-}
-
-subprojects {
-	apply plugin: 'java'
-
-	dependencies {
-		// Spigot API
-		compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
-
-//		// Lombok
-//		compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
-//		annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
-
-		// Jetbrains Annotations
-		compileOnly("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
-	}
 }
 
 dependencies {
-	implementation(project(":api"))
-
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
@@ -89,11 +47,16 @@ dependencies {
 	// Adventure-API
 	implementation("net.kyori:adventure-platform-bukkit:${prop("adventure-platform-bukkit")}")
 
+	// PatPat API
+	implementation("ru.nik51:patpat-plugin-api:1.0.0")
+
 	testImplementation('ch.qos.logback:logback-classic:1.5.18')
 	testImplementation(platform('org.junit:junit-bom:5.12.2'))
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
+
+
 }
 
 java {
@@ -115,7 +78,7 @@ jar {
 }
 
 tasks.shadowJar {
-	dependsOn test
+	archiveClassifier.set("")
 
 	exclude 'META-INF/**'
 	from("patpat-languages-files/lang") {
@@ -160,26 +123,6 @@ processResources {
 		expand(props)
 	}
 }
-
-tasks.register('copyPluginJar', Copy) {
-	dependsOn shadowJar
-	onlyIf { project.hasProperty('outputDir') }
-
-	from shadowJar.archiveFile
-	into file(project.findProperty('outputDir') ?: 'undefined')
-
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-	doFirst {
-		def targetDir = file(project.outputDir)
-		if (!targetDir.exists()) {
-			targetDir.mkdirs()
-		}
-		println "Copy JAR in: ${targetDir.absolutePath}"
-	}
-}
-build.finalizedBy copyPluginJar
-shadowJar.finalizedBy copyPluginJar
 
 publishMods {
 	def loaders = prop("loaders").toString().split(" ")
