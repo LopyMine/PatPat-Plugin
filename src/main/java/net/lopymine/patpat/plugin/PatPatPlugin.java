@@ -2,6 +2,7 @@ package net.lopymine.patpat.plugin;
 
 import lombok.Getter;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.lopymine.patpat.plugin.service.scheduler.SchedulerService;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.lopymine.patpat.plugin.command.PatPatCommandManager;
@@ -31,6 +32,7 @@ public class PatPatPlugin extends JavaPlugin {
 		if (!this.getDataFolder().exists() && !this.getDataFolder().mkdirs()) {
 			PatLogger.warn("Failed to create config folder for PatPat Plugin!");
 		}
+		SchedulerService.init(this);
 		MigrateManager.migrate();
 		PatPatConfig.reload();
 		PlayerListConfig.reload();
