@@ -27,6 +27,10 @@ repositories {
 		name = "papermc-repo"
 		url = "https://repo.papermc.io/repository/maven-public/"
 	}
+	maven {
+		name = "Canvas"
+		url = "https://maven.canvasmc.io/snapshots"
+	}
 }
 
 configurations {
@@ -34,8 +38,33 @@ configurations {
 }
 
 dependencies {
-	// Spigot API
-	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
+
+	switch (prop("target-api")) {
+		case "spigot":
+			// Spigot API
+			compileOnly "org.spigotmc:spigot-api:${prop("spigot-api")}"
+			break
+
+		case "paper":
+			// Paper API
+			compileOnly "io.papermc.paper:paper-api:${prop("paper-api")}"
+			break
+
+		case "folia":
+			// Folia API
+			compileOnly "dev.folia:folia-api:${prop("folia-api")}"
+			break
+
+		case "canvas":
+			// Canvas API
+			compileOnly "io.canvasmc.canvas:canvas-api:${prop("canvas-api")}"
+			break
+
+		default:
+			// Paper API
+			compileOnly "io.papermc.paper:paper-api:${prop("paper-api")}"
+			break
+	}
 
 	// Lombok
 	compileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
