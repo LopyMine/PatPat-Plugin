@@ -60,7 +60,15 @@ jobs:
               break
             fi
           done
-      - name: run tests
+      - name: add folia helper plugin
+        if: inputs.kernel == 'folia'
+        run: mv .github/additional_plugins/folia-spawn-players-to-zero.jar ./$SERVER_FOLDER/plugins/folia-spawn-players-to-zero.jar
+      - name: run tests (folia)
+        if: inputs.kernel == 'folia'
+        working-directory: ./.github/scripts/node
+        run: node test.js --folia
+      - name: run tests (non-folia)
+        if: inputs.kernel != 'folia'
         working-directory: ./.github/scripts/node
         run: node test.js
       - name: Upload reports on failure
