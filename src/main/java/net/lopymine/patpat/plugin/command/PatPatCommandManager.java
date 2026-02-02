@@ -79,7 +79,7 @@ public class PatPatCommandManager {
 		SimpleCommand limitCommand = getSimpleCommand(new LimitCommand());
 
 		SimpleCommand setCommand = SimpleCommand.builder()
-				.permission(StringUtils.permission("ratelimit.set"))
+				.permission(StringUtils.commandPermission("ratelimit.set"))
 				.usage("/patpat ratelimit set (increment | interval | limit)")
 				.child(incrementCommand, "increment")
 				.child(intervalCommand, "interval")
@@ -88,7 +88,7 @@ public class PatPatCommandManager {
 				.build();
 
 		return SimpleCommand.builder()
-				.permission(StringUtils.permission("ratelimit"))
+				.permission(StringUtils.commandPermission("ratelimit"))
 				.usage("/patpat ratelimit (enable | disable | set | info)")
 				.child(enableCommand, "enable", "on")
 				.child(disableCommand, "disable", "off")
@@ -104,7 +104,7 @@ public class PatPatCommandManager {
 		SimpleCommand disableCommand = getSimpleCommand(new PermissionDisableCommand());
 
 		return SimpleCommand.builder()
-				.permission(StringUtils.permission("ratelimit"))
+				.permission(StringUtils.commandPermission("permission"))
 				.usage("/patpat permission [enable | disable | set]")
 				.child(enableCommand, "enable")
 				.child(disableCommand, "disable")

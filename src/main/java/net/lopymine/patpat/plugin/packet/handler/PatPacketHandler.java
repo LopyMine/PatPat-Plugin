@@ -12,9 +12,7 @@ import ru.nik51.patpat.plugin.api.event.PatPacketReceiveEvent;
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
-import net.lopymine.patpat.plugin.config.PatPatConfig;
-import net.lopymine.patpat.plugin.config.PlayerListConfig;
-import net.lopymine.patpat.plugin.config.option.ListMode;
+import net.lopymine.patpat.plugin.config.*;
 import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.packet.*;
@@ -132,22 +130,24 @@ public class PatPacketHandler implements IPacketHandler {
 			return;
 		}
 
-		PatPacketReceiveEvent patPacketReceiveEvent = new PatPacketReceiveEvent(senderPlayer, livingEntity);
-		Bukkit.getServer().getPluginManager().callEvent(patPacketReceiveEvent);
+		if (PatPatConfig.getInstance().isApi()) {
+			PatPacketReceiveEvent patPacketReceiveEvent = new PatPacketReceiveEvent(senderPlayer, livingEntity);
+			Bukkit.getServer().getPluginManager().callEvent(patPacketReceiveEvent);
 
-		if (patPacketReceiveEvent.isCancelled()) {
-			return;
+			if (patPacketReceiveEvent.isCancelled()) {
+				return;
+			}
 		}
 
-		showPatPacket(livingEntity, senderPlayer, true);
+		showPatPacket(livingEntity, senderPlayer, false);
 	}
 
-	public static void showPatPacket(LivingEntity pattedEntity, @Nullable Player whoPatted, boolean playerInitial) {
+	public static void showPatPacket(LivingEntity pattedEntity, @Nullable Player whoPatted, boolean commandInitial) {
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
-		UUID senderUuid = whoPatted != null && playerInitial ? whoPatted.getUniqueId() : UuidUtils.ZERO;
+		UUID senderUuid = whoPatted != null ? whoPatted.getUniqueId() : UuidUtils.ZERO;
 		List<PatPlayer> nearbyPlayers = new ArrayList<>();
 		for (Entity entity : pattedEntity.getNearbyEntities(PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS)) {
-			if (!(entity instanceof Player player) || entity.getUniqueId().equals(senderUuid)) {
+			if (!(entity instanceof Player player) || (entity.getUniqueId().equals(senderUuid) && !commandInitial)) {
 				continue;
 			}
 			nearbyPlayers.add(PatPlayer.of(player));
@@ -183,23 +183,26 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	private boolean canHandle(Player sender) {
-		UUID senderUuid = sender.getUniqueId();
-		PatPatConfig config = PatPatConfig.getInstance();
-		if (config.getPermissionRestrictions().isEnabled() && !sender.hasPermission(config.getPermissionRestrictions().getPermissionForPat())) {
-			return false;
-		}
+		return checkPermission(sender)
+				&& checkRateLimit(sender)
+				&& checkListMode(sender.getUniqueId());
+	}
 
-		if (!sender.hasPermission(PatPatConfig.getInstance().getRateLimit().getPermissionBypass()) && !RateLimitManager.canPat(senderUuid)) {
-			return false;
-		}
+	private boolean checkPermission(Player sender) {
+		PermissionConfig permissionRestriction = PatPatConfig.getInstance().getPermissionRestrictions();
+		return !permissionRestriction.isEnabled() || sender.hasPermission(permissionRestriction.getPermissionForPat());
+	}
 
-		Set<UUID> uuids = PlayerListConfig.getInstance().getUuids();
-		ListMode listMode = PatPatConfig.getInstance().getListMode();
+	private boolean checkRateLimit(Player sender) {
+		RateLimitConfig ratelimitConfig = PatPatConfig.getInstance().getRateLimit();
+		return !ratelimitConfig.isEnabled() || sender.hasPermission(ratelimitConfig.getPermissionBypass()) || RateLimitManager.canPat(sender.getUniqueId());
+	}
 
-		return switch (listMode) {
+	private boolean checkListMode(UUID senderUuid) {
+		return switch (PatPatConfig.getInstance().getListMode()) {
 			case DISABLED -> true;
-			case WHITELIST -> uuids.contains(senderUuid);
-			case BLACKLIST -> !uuids.contains(senderUuid);
+			case WHITELIST -> PlayerListConfig.getInstance().containsUuid(senderUuid);
+			case BLACKLIST -> !PlayerListConfig.getInstance().containsUuid(senderUuid);
 		};
 	}
 

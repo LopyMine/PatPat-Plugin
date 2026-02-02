@@ -2,7 +2,7 @@ import me.modmuss50.mpp.ReleaseType
 
 plugins {
 	id("java")
-	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
+	id("me.modmuss50.mod-publish-plugin") version "1.1.0"
 	id("com.gradleup.shadow") version "9.1.0"
 }
 
@@ -10,9 +10,11 @@ group = prop("plugin_maven_group")
 version = prop("plugin_version")
 
 def mainJava = prop("java_version") as int
+def foliaJava = 17
 def testJava = 21
 
 def mainJavaVersion = JavaVersion.toVersion(mainJava)
+def foliaJavaVersion = JavaVersion.toVersion(foliaJava)
 
 base {
 	archivesName = prop("plugin_id")
@@ -55,8 +57,6 @@ dependencies {
 	testImplementation('org.junit.jupiter:junit-jupiter')
 	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
-
-
 }
 
 java {
@@ -86,7 +86,12 @@ tasks.shadowJar {
 	}
 	relocate 'net.kyori', 'shaded.net.kyori'
 
-	destinationDirectory = file("$rootDir/libs")
+	def argOutputDir = project.findProperty("outputDir")
+	if (argOutputDir != null) {
+		destinationDirectory = file(argOutputDir)
+	} else {
+		destinationDirectory = file("$rootDir/libs")
+	}
 }
 
 test {
@@ -125,32 +130,28 @@ processResources {
 }
 
 publishMods {
+	file = getVerifiedOrDefaultJar(prop("plugin_id"), prop("plugin_version"))
+
+	def isTesting = Boolean.parseBoolean(prop("test_publish").toString())
+	def isCurseForgeKeyProvided = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
+	def isModrinthKeyProvided = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
+	def bl3 = isTesting || isModrinthKeyProvided || isCurseForgeKeyProvided
+	dryRun = bl3
+
 	def loaders = prop("loaders").toString().split(" ")
 	def modrinthProjectId = prop("modrinth_id").toString()
-	def embedsDepends = prop("embeds").toString().split(" ")
 	def curseForgeProjectId = prop("curseforge_id").toString()
-	def requiresDepends = prop("requires").toString().split(" ")
-	def optionalDepends = prop("optional").toString().split(" ")
 	def endSupportedVersion = prop("end_supported_version").toString()
-	def incompatibleDepends = prop("incompatible").toString().split(" ")
 	def startSupportedVersion = prop("start_supported_version").toString()
 	def versionTypeProperty = prop("version_type").toString().replace("RELEASE", "STABLE")
-	def isClient = Boolean.parseBoolean(prop("is_for_client)").toString())
-	def isTesting = Boolean.parseBoolean(prop("test_publish)").toString())
-	def isServer = Boolean.parseBoolean(prop("is_for_server)").toString())
 	def versionName = "[${startSupportedVersion}-${endSupportedVersion}] ${prop("plugin_name")} v${prop("plugin_version")}"
-	def bl = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
-	def bl2 = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
-	def bl3 = isTesting || bl || bl2
 
 	println "[PublishMods] [INFO] Configuring '${versionName}' for publishing"
 
 	displayName = versionName
-	file = getVerifiedOrDefaultJar(prop("plugin_name"), prop("plugin_version"))
 	changelog = getChangeLog()
 	type = ReleaseType.of(versionTypeProperty)
 	modLoaders.addAll(loaders)
-	dryRun = bl3
 
 	if (bl3) {
 		println "[PublishMods] [WARNING] Test Mode is Enabled!"
@@ -203,19 +204,6 @@ publishMods {
 		} else {
 			minecraftVersions.add(endSupportedVersion)
 		}
-
-		if (requiresDepends.first() != "none") {
-			requires(requiresDepends)
-		}
-		if (optionalDepends.first() != "none") {
-			optional(optionalDepends)
-		}
-		if (incompatibleDepends.first() != "none") {
-			incompatible(incompatibleDepends)
-		}
-		if (embedsDepends.first() != "none") {
-			embeds(embedsDepends)
-		}
 	}
 }
 
@@ -231,7 +219,7 @@ def getVerifiedOrDefaultJar(String pluginName, String pluginVersion) {
 }
 
 String getChangeLog() {
-	def file = project.rootProject.file("publish/CHANGELOG.md")
+	def file = project.rootProject.file("CHANGELOG.md")
 	if (file.exists()) {
 		def text = file.getText()
 		if (!text.isBlank()) {

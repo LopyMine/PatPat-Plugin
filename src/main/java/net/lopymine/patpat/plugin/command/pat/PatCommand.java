@@ -18,61 +18,84 @@ import java.util.*;
 public class PatCommand implements ICommand {
 
 	private static final int MAX_DISTANCE_SUGGESTION_ENTITY = 16;
+	private static final String API_NULL_PLACEHOLDER = "console";
 
 	@Override
 	public void execute(CommandSender sender, String[] strings) {
-		if (strings.length != 1) {
+		if (strings.length == 0 || strings.length > 2) {
 			sender.sendMsg(Component.text(getExampleOfUsage()));
 			return;
 		}
 
-		String value = strings[0];
-		Player whoPatted = sender instanceof Player player ? player : null;
-		LivingEntity pattedEntity = null;
+		String pattedEntityValue = strings[0];
+		LivingEntity pattedEntity;
 		try {
-			UUID uuid = UUID.fromString(value);
+			UUID uuid = UUID.fromString(pattedEntityValue);
 			Entity entity = Bukkit.getEntity(uuid);
 			if (entity == null) {
-				sender.sendMsg("patpat.command.error.entity_not_exist", Component.text(value).color(NamedTextColor.GOLD));
+				sender.sendMsg("patpat.command.error.entity_not_exist", Component.text(pattedEntityValue).color(NamedTextColor.GOLD));
 				return;
 			}
 			if (!(entity instanceof LivingEntity livingEntity)) {
-				sender.sendMsg("patpat.command.error.entity_not_living_entity", Component.text(value).color(NamedTextColor.GOLD));
+				sender.sendMsg("patpat.command.error.entity_not_living_entity", Component.text(pattedEntityValue).color(NamedTextColor.GOLD));
 				return;
 			}
 			pattedEntity = livingEntity;
 
 		} catch (IllegalArgumentException ignored) {
-			Player player = Bukkit.getPlayerExact(value);
+			Player player = Bukkit.getPlayerExact(pattedEntityValue);
 			if (player == null) {
-				sender.sendMsg("patpat.command.error.player_not_exist", Component.text(value).color(NamedTextColor.GOLD));
+				sender.sendMsg("patpat.command.error.player_not_exist", Component.text(pattedEntityValue).color(NamedTextColor.GOLD));
 				return;
 			}
 			if (!player.isOnline()) {
-				sender.sendMsg("patpat.command.error.player_not_online", Component.text(value).color(NamedTextColor.GOLD));
+				sender.sendMsg("patpat.command.error.player_not_online", Component.text(pattedEntityValue).color(NamedTextColor.GOLD));
 				return;
 			}
 			pattedEntity = player;
 		}
-		PatPacketHandler.showPatPacket(pattedEntity, whoPatted, false);
+		Player whoPatted = sender instanceof Player player ? player : null;
+		if (strings.length == 2) {
+			if (Objects.equals(strings[1], API_NULL_PLACEHOLDER)) {
+				whoPatted = null;
+			} else {
+				Player player = Bukkit.getPlayerExact(strings[1]);
+				if (player == null) {
+					sender.sendMsg("patpat.command.error.player_not_exist", Component.text(strings[1]).color(NamedTextColor.GOLD));
+					return;
+				}
+				if (!player.isOnline()) {
+					sender.sendMsg("patpat.command.error.player_not_online", Component.text(strings[1]).color(NamedTextColor.GOLD));
+					return;
+				}
+				whoPatted = player;
+			}
+		}
+		PatPacketHandler.showPatPacket(pattedEntity, whoPatted, true);
 		String patSuccessKey = pattedEntity instanceof Player ? "patpat.command.pat.success.player" : "patpat.command.pat.success.mob";
-		sender.sendMsg(patSuccessKey, Component.text(value).color(NamedTextColor.GOLD));
+		sender.sendMsg(patSuccessKey, Component.text(pattedEntityValue).color(NamedTextColor.GOLD));
 	}
 
 	@Override
 	public List<String> getSuggestions(CommandSender commandSender, String[] strings) {
-		if (strings.length != 1) {
+		if (strings.length == 0 || strings.length > 2) {
 			return Collections.emptyList();
 		}
-		String value = strings[0];
+
+		String value = strings[strings.length - 1].toLowerCase();
 		List<String> suggestions = new ArrayList<>();
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			String name = player.getName();
-			if (name.startsWith(value)) {
+			if (name.toLowerCase().startsWith(value)) {
 				suggestions.add(name);
 			}
 		}
-
+		if (strings.length == 2) {
+			if (API_NULL_PLACEHOLDER.toLowerCase().startsWith(strings[1].toLowerCase())) {
+				suggestions.add(API_NULL_PLACEHOLDER);
+			}
+			return suggestions;
+		}
 		if (!(commandSender instanceof Player player)) {
 			return suggestions;
 		}
@@ -95,7 +118,7 @@ public class PatCommand implements ICommand {
 
 	@Override
 	public String getExampleOfUsage() {
-		return "/patpat pat (<UUID> | <NICKNAME>)";
+		return "/patpat pat (<UUID> | <NICKNAME>) [<NICKNAME>]";
 	}
 
 	@Override

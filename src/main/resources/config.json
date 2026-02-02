@@ -5,6 +5,7 @@
 		"version": "1.0.1"
 	},
 	"debug": false,
+	"api": true,
 	"listMode": "DISABLED",
 	"rateLimit": {
 		"enabled": false,

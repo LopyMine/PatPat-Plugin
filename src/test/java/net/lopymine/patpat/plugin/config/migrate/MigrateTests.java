@@ -93,6 +93,7 @@ class MigrateTests {
 			Assertions.assertNotNull(config);
 			Assertions.assertTrue(config.getInfo().getVersion().is(Version.of("1.0.1")));
 			Assertions.assertTrue(config.isDebug());
+			Assertions.assertTrue(config.isApi());
 			Assertions.assertEquals(ListMode.BLACKLIST, config.getListMode());
 		}
 	}

@@ -4,8 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
 
-import net.lopymine.patpat.plugin.PatLogger;
-import net.lopymine.patpat.plugin.PatPatPlugin;
+import net.lopymine.patpat.plugin.*;
 import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.config.option.ListMode;
 import net.lopymine.patpat.plugin.util.JsonUtils;
@@ -26,6 +25,7 @@ public class PatPatConfig {
 	@SerializedName("_info")
 	private InfoConfig info;
 	private boolean debug;
+	private boolean api;
 
 	private ListMode listMode;
 	private RateLimitConfig rateLimit;
@@ -37,6 +37,7 @@ public class PatPatConfig {
 		this.info                   = new InfoConfig();
 		this.permissionRestrictions = new PermissionConfig();
 		this.debug                  = false;
+		this.api                    = true;
 	}
 
 	public static void reload() {

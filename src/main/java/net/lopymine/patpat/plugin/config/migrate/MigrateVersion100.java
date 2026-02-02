@@ -23,6 +23,7 @@ public class MigrateVersion100 implements MigrateHandler {
 	public boolean migrate(JsonConfigReader jsonConfigReader) {
 		JsonObject json = jsonConfigReader.getJson();
 		json.add("permissionRestrictions", JsonUtils.GSON.toJsonTree(new PermissionConfig()));
+		json.addProperty("api", true);
 		json.getAsJsonObject("_info").addProperty("version", "1.0.1");
 		return jsonConfigReader.saveConfig();
 	}

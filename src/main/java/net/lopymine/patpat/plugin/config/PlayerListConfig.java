@@ -43,6 +43,10 @@ public class PlayerListConfig {
 		return nicknameByUuid.keySet();
 	}
 
+	public boolean containsUuid(UUID uuid) {
+		return nicknameByUuid.containsKey(uuid);
+	}
+
 	public Collection<String> getNicknames() {
 		return nicknameByUuid.values();
 	}
