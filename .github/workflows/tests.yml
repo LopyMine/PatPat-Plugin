@@ -45,3 +45,22 @@ jobs:
       kernel: "paper"
       version: ${{ matrix.version }}
 
+  folia-server-tests:
+    needs: build
+    strategy:
+      matrix:
+        version: [ "1.20.1", "1.21.8" ]
+    uses: ./.github/workflows/server-basic-test.yml
+    with:
+      kernel: "folia"
+      version: ${{ matrix.version }}
+
+  folia-advanced-server-tests:
+    needs: paper-server-tests
+    strategy:
+      matrix:
+        version: [ "1.20.1", "1.21.8" ]
+    uses: ./.github/workflows/server-advanced-test.yml
+    with:
+      kernel: "folia"
+      version: ${{ matrix.version }}
