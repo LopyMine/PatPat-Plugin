@@ -7,7 +7,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.ClickEvent.Action;
 import net.kyori.adventure.text.format.NamedTextColor;
 
-import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.entity.IPatPlayer;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
 import net.lopymine.patpat.plugin.util.ComponentUtils;
 import net.lopymine.patpat.plugin.util.StringUtils;
@@ -27,7 +27,7 @@ public class PatPacketOldHandler extends PatPacketHandler {
 	public static final String PATPAT_C2S_PACKET_ID = StringUtils.modId("pat_entity_c2s_packet");
 	public static final String PATPAT_S2C_PACKET_ID = StringUtils.modId("pat_entity_s2c_packet");
 
-	private static final Set<PatPlayer> WARNED_PLAYERS = new HashSet<>();
+	private static final Set<IPatPlayer> WARNED_PLAYERS = new HashSet<>();
 
 	private static final Component OLD_VERSION_WARN = Component
 			.translatable("patpat.warn.old_version_mod")
@@ -47,7 +47,7 @@ public class PatPacketOldHandler extends PatPacketHandler {
 	}
 
 	@Override
-	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
+	public void handle(IPatPlayer sender, ByteArrayDataInput buf) {
 		super.handle(sender, buf);
 		if (WARNED_PLAYERS.contains(sender)) {
 			return;

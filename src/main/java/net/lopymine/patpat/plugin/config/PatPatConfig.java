@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import net.lopymine.patpat.plugin.*;
-import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.config.option.ListMode;
 import net.lopymine.patpat.plugin.util.JsonUtils;
 

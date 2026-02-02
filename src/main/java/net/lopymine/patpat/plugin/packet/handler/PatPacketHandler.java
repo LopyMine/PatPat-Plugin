@@ -11,9 +11,9 @@ import ru.nik51.patpat.plugin.api.event.PatPacketReceiveEvent;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
-import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
+import net.lopymine.patpat.plugin.entity.*;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.config.*;
-import net.lopymine.patpat.plugin.entity.PatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.util.StringUtils;
@@ -66,7 +66,7 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	@Override
-	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
+	public void handle(IPatPlayer sender, ByteArrayDataInput buf) {
 		Player senderPlayer = sender.getPlayer();
 		if (!this.canHandle(senderPlayer)) {
 			return;
@@ -145,16 +145,16 @@ public class PatPacketHandler implements IPacketHandler {
 	public static void showPatPacket(LivingEntity pattedEntity, @Nullable Player whoPatted, boolean commandInitial) {
 		PatPatPlugin plugin = PatPatPlugin.getInstance();
 		UUID senderUuid = whoPatted != null ? whoPatted.getUniqueId() : UuidUtils.ZERO;
-		List<PatPlayer> nearbyPlayers = new ArrayList<>();
+		List<IPatPlayer> nearbyPlayers = new ArrayList<>();
 		for (Entity entity : pattedEntity.getNearbyEntities(PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS)) {
 			if (!(entity instanceof Player player) || (entity.getUniqueId().equals(senderUuid) && !commandInitial)) {
 				continue;
 			}
-			nearbyPlayers.add(PatPlayer.of(player));
+			nearbyPlayers.add(PatPlayerFactory.of(player));
 		}
 
 		if (pattedEntity instanceof Player player) {
-			nearbyPlayers.add(PatPlayer.of(player));
+			nearbyPlayers.add(PatPlayerFactory.of(player));
 		}
 
 		Map<String, PatPacket> packets = new HashMap<>();
@@ -173,7 +173,7 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	@Nullable
-	public static IPatPacket getPacketHandler(PatPlayer player) {
+	public static IPatPacket getPacketHandler(IPatPlayer player) {
 		for (IPatPacket packetHandler : PAT_PACKET_HANDLERS) {
 			if (packetHandler.canHandle(player)) {
 				return packetHandler;

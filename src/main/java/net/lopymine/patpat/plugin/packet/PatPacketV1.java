@@ -7,7 +7,7 @@ import org.bukkit.entity.Entity;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.config.Version;
-import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.entity.IPatPlayer;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.util.StringUtils;
 import net.lopymine.patpat.plugin.util.UuidUtils;
@@ -21,12 +21,12 @@ public class PatPacketV1 implements IPatPacket {
 	private static final String PACKET_ID = StringUtils.modId("pat_entity_s2c_packet");
 
 	@Override
-	public boolean canHandle(PatPlayer player) {
+	public boolean canHandle(IPatPlayer player) {
 		return player.getVersion().isGreaterOrEqualThan(PAT_PACKET_V1_VERSION);
 	}
 
 	@Override
-	public @Nullable Entity getPattedEntity(PatPlayer player, ByteArrayDataInput buf) {
+	public @Nullable Entity getPattedEntity(IPatPlayer player, ByteArrayDataInput buf) {
 		try {
 			return Bukkit.getServer().getEntity(buf.readUuid());
 		} catch (IllegalStateException e) {

@@ -9,12 +9,11 @@ plugins {
 group = prop("plugin_maven_group")
 version = prop("plugin_version")
 
-def mainJava = prop("java_version") as int
-def foliaJava = 17
-def testJava = 21
+def mainJava = prop("java_main_version") as int
+def foliaJava = prop("java_folia_version") as int
+def testJava = prop("java_tests_version") as int
 
 def mainJavaVersion = JavaVersion.toVersion(mainJava)
-def foliaJavaVersion = JavaVersion.toVersion(foliaJava)
 
 base {
 	archivesName = prop("plugin_id")
@@ -37,6 +36,7 @@ repositories {
 }
 
 dependencies {
+	// Spigot-API
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
@@ -77,8 +77,45 @@ jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
+sourceSets {
+	folia {
+		java {
+			srcDirs = ['src/folia/java']
+		}
+		dependencies {
+			// Folia-API
+			foliaImplementation("dev.folia:folia-api:1.20.1-R0.1-SNAPSHOT")
+
+			// Lombok
+			foliaCompileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
+			foliaAnnotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
+		}
+
+		compileClasspath += sourceSets.main.output + configurations.compileClasspath
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+tasks.compileFoliaJava {
+	description = "Compile Folia classes"
+	group = "build"
+
+	java.sourceCompatibility = foliaJava
+	java.targetCompatibility = foliaJava
+
+	source = sourceSets.folia.java
+	classpath = sourceSets.folia.compileClasspath
+	destinationDirectory = layout.buildDirectory.dir("classes/folia")
+
+	options.release.set(foliaJava)
+}
+
 tasks.shadowJar {
+	dependsOn tasks.named('compileFoliaJava')
+
 	archiveClassifier.set("")
+
+	from './build/classes/folia'
 
 	exclude 'META-INF/**'
 	from("patpat-languages-files/lang") {

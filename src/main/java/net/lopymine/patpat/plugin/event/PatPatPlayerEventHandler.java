@@ -7,7 +7,7 @@ import org.bukkit.event.player.*;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
-import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.entity.PatPlayerFactory;
 import net.lopymine.patpat.plugin.packet.handler.HelloPacketHandler;
 
 public class PatPatPlayerEventHandler implements Listener {
@@ -28,13 +28,13 @@ public class PatPatPlayerEventHandler implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event) {
-		PatPlayer.register(event.getPlayer());
+		PatPlayerFactory.register(event.getPlayer());
 	}
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent event) {
 		Player player = event.getPlayer();
-		PatPlayer.unregister(player);
+		PatPlayerFactory.unregister(player);
 	}
 
 }

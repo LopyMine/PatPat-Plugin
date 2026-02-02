@@ -6,8 +6,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 
 import net.lopymine.patpat.plugin.command.api.ICommand;
-import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
-import net.lopymine.patpat.plugin.command.ratelimit.Time;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
+import net.lopymine.patpat.plugin.ratelimit.Time;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.RateLimitConfig;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;

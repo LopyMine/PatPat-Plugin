@@ -1,4 +1,4 @@
-package net.lopymine.patpat.plugin.command.ratelimit;
+package net.lopymine.patpat.plugin.ratelimit;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

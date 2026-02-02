@@ -2,7 +2,7 @@ package net.lopymine.patpat.plugin.util;
 
 import lombok.experimental.UtilityClass;
 
-import net.lopymine.patpat.plugin.command.ratelimit.RateLimitUnit;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitUnit;
 
 import java.util.Set;
 import java.util.stream.Collectors;

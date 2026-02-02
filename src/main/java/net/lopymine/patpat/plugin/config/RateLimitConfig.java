@@ -4,7 +4,7 @@ import com.google.gson.annotations.JsonAdapter;
 import lombok.Getter;
 import lombok.Setter;
 
-import net.lopymine.patpat.plugin.command.ratelimit.Time;
+import net.lopymine.patpat.plugin.ratelimit.Time;
 import net.lopymine.patpat.plugin.config.adapter.TimeAdapter;
 
 @Getter
