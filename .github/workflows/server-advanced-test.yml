@@ -45,6 +45,9 @@ jobs:
         with:
           name: plugin
           path: ./${{ env.SERVER_FOLDER }}/plugins/
+      - name: add folia helper plugin
+        if: inputs.kernel == 'folia'
+        run: mv .github/additional_plugins/folia-spawn-on-zeros-1.0.jar ./$SERVER_FOLDER/plugins/folia-spawn-on-zeros-1.0.jar
       - name: move server.properties in server folder
         run: mv .github/templates/advanced-test.properties ./$SERVER_FOLDER/server.properties
       - name: run server
@@ -60,9 +63,6 @@ jobs:
               break
             fi
           done
-      - name: add folia helper plugin
-        if: inputs.kernel == 'folia'
-        run: mv .github/additional_plugins/folia-spawn-players-to-zero.jar ./$SERVER_FOLDER/plugins/folia-spawn-players-to-zero.jar
       - name: run tests (folia)
         if: inputs.kernel == 'folia'
         working-directory: ./.github/scripts/node

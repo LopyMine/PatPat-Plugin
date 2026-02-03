@@ -1,8 +1,6 @@
 import { PatPatBotV1, PatPatBotV2, HELLO_PACKET_V2_S2C, PAT_PACKET_V1_S2C, PAT_PACKET_V2_S2C } from './patpat-bot.js'
 import { MyRcon } from './rcon.js'
 
-
-
 // Test pat work v2 <-> v2
 async function test1(rcon) {
   try {
@@ -19,7 +17,7 @@ async function test1(rcon) {
     await rcon.waitResponse(1500, '')
 
     console.log('Send pat packet bot1 -> bot2')
-    setTimeout(() => bot1.sendPat(bot2.getEntityId()), 100)
+    setTimeout(() => bot1.sendPat(bot2.getEntityId()), 1000)
     await bot2.waitPacket(PAT_PACKET_V2_S2C, 3000)
     console.log('Packet bot1 -> bot2: success')
 
@@ -83,7 +81,9 @@ if(process.argv.includes('--folia')){
   console.log('Plugin work')
 }
 
+console.log("Test1: Test pat work v2 <-> v2")
 await test1(rcon1)
+console.log("Test2: Test pat work v1 <-> v2")
 await test2(rcon1)
 
 console.log('Tests passed')
