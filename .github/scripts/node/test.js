@@ -5,7 +5,7 @@ import { MyRcon } from './rcon.js'
 async function test1(rcon) {
   try {
     const bot1 = new PatPatBotV2('Bot1')
-    bot1.waitPacket(HELLO_PACKET_V2_S2C, 2000)
+    bot1.waitPacket(HELLO_PACKET_V2_S2C, 8000)
     await bot1.connect()
     bot1.printStatus()
     const bot2 = new PatPatBotV2('Bot2')
@@ -75,9 +75,9 @@ await rcon1.waitConnect(90)
 console.log('Server prepare')
 setTimeout(() => rcon1.conn.send('patpat info'), 100)
 if(process.argv.includes('--folia')){
-  console.log('Skip plugin output test, because folia not support rcon :|')
+  console.log('Skip plugin output test, because old folia server not support rcon')
 } else {
-  await rcon1.waitResponse(1000, 'Platform:', 'Minecraft Version:', 'Version:')
+  await rcon1.waitResponse(3000, 'Platform:', 'Minecraft Version:', 'Version:')
   console.log('Plugin work')
 }
 

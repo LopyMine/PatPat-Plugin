@@ -63,14 +63,21 @@ jobs:
               break
             fi
           done
-      - name: run tests (folia)
-        if: inputs.kernel == 'folia'
+      - name: run tests
         working-directory: ./.github/scripts/node
-        run: node test.js --folia
-      - name: run tests (non-folia)
-        if: inputs.kernel != 'folia'
-        working-directory: ./.github/scripts/node
-        run: node test.js
+        run: |
+          VERSION="${{ inputs.version }}"
+          KERNEL="${{ inputs.kernel }}"
+
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          if [[ "$KERNEL" == "folia" ]]; then
+            if [[ "$MINOR" -gt 21 ]]; then node test.js
+            elif [[ "$MINOR" -eq 21 && "$PATCH" -ge 8 ]]; then node test.js
+            else node test.js --folia; fi
+          else
+            node test.js
+          fi
       - name: Upload reports on failure
         if: failure()
         uses: actions/upload-artifact@v4
