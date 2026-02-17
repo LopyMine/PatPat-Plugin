@@ -1,0 +1,68 @@
+#!/usr/bin/expect
+
+set ansi {\x1b\[[0-9;]*m}
+
+proc expect_pattern {pattern okMsg errMsg {timeoutSec 10}} {
+    set oldTimeout $::timeout
+    set ::timeout $timeoutSec
+    expect {
+        -re $pattern {
+            if {$okMsg ne ""} { puts $okMsg }
+        }
+        timeout {
+            puts $errMsg
+            exit 1
+        }
+        eof     {
+            puts $errMsg
+            exit 1
+        }
+    }
+    set ::timeout $oldTimeout
+}
+
+proc expect_str {str okMsg errMsg {timeoutSec 10}} {
+    set oldTimeout $::timeout
+    set ::timeout $timeoutSec
+    expect {
+        $str {
+            if {$okMsg ne ""} { puts $okMsg }
+        }
+        timeout {
+            puts $errMsg
+            exit 1
+        }
+        eof     {
+            puts $errMsg
+            exit 1
+        }
+    }
+    set ::timeout $oldTimeout
+}
+
+
+spawn ./start.sh
+
+expect_str "INFO]: Done " \
+    "Server loaded" \
+    "ERROR: server is not launched" \
+    90
+
+send "patpat info\n"
+expect_pattern "\[${ansi}PatPat${ansi}] Platform:" \
+    "Plugin answered on command" \
+    "ERROR: plugin is not answered on command" \
+    5
+expect_pattern "\[${ansi}PatPat${ansi}] Minecraft Version:" \
+    "Plugin answered on command" \
+    "ERROR: plugin is not answered on command" \
+    2
+expect_pattern "\[${ansi}PatPat${ansi}] Version:" \
+    "Plugin answered on command" \
+    "ERROR: plugin is not answered on command" \
+    2
+
+send "stop\n"
+expect eof
+puts "Test ended"
+exit 0

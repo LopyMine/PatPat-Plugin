@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.*;
 
 import net.lopymine.patpat.plugin.*;
-import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.entity.*;
 import net.lopymine.patpat.plugin.packet.handler.*;
 
 import java.util.*;
@@ -20,7 +20,7 @@ public class PatPatPacketListener implements PluginMessageListener {
 		if(!isPatPatPacket(s)){
 			return;
 		}
-		PatPlayer patPlayer = PatPlayer.of(sender);
+		IPatPlayer patPlayer = PatPlayerFactory.of(sender);
 		IPacketHandler packetHandler = this.handlers.get(s);
 		PatLogger.debug("Received packet with id %s from %s with data %s".formatted(s, sender.getName(), Arrays.toString(bytes)));
 		if (packetHandler == null) {

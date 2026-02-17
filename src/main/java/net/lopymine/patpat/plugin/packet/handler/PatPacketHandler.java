@@ -7,17 +7,17 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.*;
 import org.bukkit.util.BoundingBox;
+import ru.nik51.patpat.plugin.api.event.PatPacketReceiveEvent;
 
 import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
-import net.lopymine.patpat.plugin.command.ratelimit.RateLimitManager;
-import net.lopymine.patpat.plugin.config.PatPatConfig;
-import net.lopymine.patpat.plugin.config.PlayerListConfig;
-import net.lopymine.patpat.plugin.config.option.ListMode;
-import net.lopymine.patpat.plugin.entity.PatPlayer;
+import net.lopymine.patpat.plugin.entity.*;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
+import net.lopymine.patpat.plugin.config.*;
 import net.lopymine.patpat.plugin.extension.ByteArrayDataExtension;
 import net.lopymine.patpat.plugin.packet.*;
 import net.lopymine.patpat.plugin.util.StringUtils;
+import net.lopymine.patpat.plugin.util.UuidUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -34,7 +34,7 @@ public class PatPacketHandler implements IPacketHandler {
 
 	private static final double CREATIVE_INTERACT_DISTANCE = 3.1;
 	private static final double SURVIVOR_INTERACT_DISTANCE = 5.1;
-	private final double patVisibilityRadius = Bukkit.getServer().getViewDistance() * 16D;
+	private static final double PAT_VISIBILITY_RADIUS = Bukkit.getServer().getViewDistance() * 16D;
 
 
 	private static Function<Player, Double> getInteractDistanceFunction() {
@@ -66,8 +66,7 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	@Override
-	public void handle(PatPlayer sender, ByteArrayDataInput buf) {
-		PatPatPlugin plugin = PatPatPlugin.getInstance();
+	public void handle(IPatPlayer sender, ByteArrayDataInput buf) {
 		Player senderPlayer = sender.getPlayer();
 		if (!this.canHandle(senderPlayer)) {
 			return;
@@ -131,38 +130,42 @@ public class PatPacketHandler implements IPacketHandler {
 			return;
 		}
 
-		List<PatPlayer> nearbyPlayers = new ArrayList<>(pattedEntity
-				.getNearbyEntities(patVisibilityRadius, patVisibilityRadius, patVisibilityRadius)
-				.stream()
-				.map(entity -> {
-					if (entity instanceof Player player) {
-						return player;
-					}
-					return null;
-				})
-				.filter(Objects::nonNull)
-				.map(PatPlayer::of)
-				.toList()
-		);
+		if (PatPatConfig.getInstance().isApi()) {
+			PatPacketReceiveEvent patPacketReceiveEvent = new PatPacketReceiveEvent(senderPlayer, livingEntity);
+			Bukkit.getServer().getPluginManager().callEvent(patPacketReceiveEvent);
 
-		if (pattedEntity instanceof Player player) {
-			nearbyPlayers.add(PatPlayer.of(player));
-		}
-
-		UUID senderUuid = sender.getUniqueId();
-		Map<String, PatPacket> packets = new HashMap<>();
-		nearbyPlayers.forEach(player -> {
-			UUID playerUuid = player.getUniqueId();
-			if (playerUuid.equals(senderUuid)) {
+			if (patPacketReceiveEvent.isCancelled()) {
 				return;
 			}
+		}
+
+		showPatPacket(livingEntity, senderPlayer, false);
+	}
+
+	public static void showPatPacket(LivingEntity pattedEntity, @Nullable Player whoPatted, boolean commandInitial) {
+		PatPatPlugin plugin = PatPatPlugin.getInstance();
+		UUID senderUuid = whoPatted != null ? whoPatted.getUniqueId() : UuidUtils.ZERO;
+		List<IPatPlayer> nearbyPlayers = new ArrayList<>();
+		for (Entity entity : pattedEntity.getNearbyEntities(PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS, PAT_VISIBILITY_RADIUS)) {
+			if (!(entity instanceof Player player) || (entity.getUniqueId().equals(senderUuid) && !commandInitial)) {
+				continue;
+			}
+			nearbyPlayers.add(PatPlayerFactory.of(player));
+		}
+
+		if (pattedEntity instanceof Player player) {
+			nearbyPlayers.add(PatPlayerFactory.of(player));
+		}
+
+		Map<String, PatPacket> packets = new HashMap<>();
+		nearbyPlayers.forEach(player -> {
 			IPatPacket packetHandler = player.getPatPacketHandler();
 			if (packetHandler == null) {
 				return;
 			}
 			PatPacket packet = packets.computeIfAbsent(
 					packetHandler.getPacketHandlerId(),
-					s -> packetHandler.getPacket(pattedEntity, senderPlayer)
+					s -> packetHandler.getPacket(pattedEntity, whoPatted)
 			);
 			PatLogger.debug("Sending out pat packet to %s with id %s and data %s", player.getName(), packet.channel(), Arrays.toString(packet.bytes()));
 			player.sendPluginMessage(plugin, packet.channel(), packet.bytes());
@@ -170,7 +173,7 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	@Nullable
-	public static IPatPacket getPacketHandler(PatPlayer player) {
+	public static IPatPacket getPacketHandler(IPatPlayer player) {
 		for (IPatPacket packetHandler : PAT_PACKET_HANDLERS) {
 			if (packetHandler.canHandle(player)) {
 				return packetHandler;
@@ -180,18 +183,26 @@ public class PatPacketHandler implements IPacketHandler {
 	}
 
 	private boolean canHandle(Player sender) {
-		UUID senderUuid = sender.getUniqueId();
-		if (!sender.hasPermission(PatPatConfig.getInstance().getRateLimit().getPermissionBypass()) && !RateLimitManager.canPat(senderUuid)) {
-			return false;
-		}
+		return checkPermission(sender)
+				&& checkRateLimit(sender)
+				&& checkListMode(sender.getUniqueId());
+	}
 
-		Set<UUID> uuids = PlayerListConfig.getInstance().getUuids();
-		ListMode listMode = PatPatConfig.getInstance().getListMode();
+	private boolean checkPermission(Player sender) {
+		PermissionConfig permissionRestriction = PatPatConfig.getInstance().getPermissionRestrictions();
+		return !permissionRestriction.isEnabled() || sender.hasPermission(permissionRestriction.getPermissionForPat());
+	}
 
-		return switch (listMode) {
+	private boolean checkRateLimit(Player sender) {
+		RateLimitConfig ratelimitConfig = PatPatConfig.getInstance().getRateLimit();
+		return !ratelimitConfig.isEnabled() || sender.hasPermission(ratelimitConfig.getPermissionBypass()) || RateLimitManager.canPat(sender.getUniqueId());
+	}
+
+	private boolean checkListMode(UUID senderUuid) {
+		return switch (PatPatConfig.getInstance().getListMode()) {
 			case DISABLED -> true;
-			case WHITELIST -> uuids.contains(senderUuid);
-			case BLACKLIST -> !uuids.contains(senderUuid);
+			case WHITELIST -> PlayerListConfig.getInstance().containsUuid(senderUuid);
+			case BLACKLIST -> !PlayerListConfig.getInstance().containsUuid(senderUuid);
 		};
 	}
 

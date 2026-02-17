@@ -1,12 +1,12 @@
-package net.lopymine.patpat.plugin.command.ratelimit;
+package net.lopymine.patpat.plugin.ratelimit;
 
-import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitTask;
-
+import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.PatPatPlugin;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.RateLimitConfig;
+import net.lopymine.patpat.plugin.util.FoliaUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class RateLimitManager {
@@ -15,9 +15,38 @@ public class RateLimitManager {
 		throw new IllegalStateException("Manager class");
 	}
 
-	private static BukkitTask task;
+	private static IRateLimitTask task;
 
 	private static final Map<UUID, Integer> uuidToPat = new HashMap<>();
+
+	public static void init() {
+		if (task != null) {
+			return;
+		}
+		if(FoliaUtils.IS_FOLIA){
+			try {
+				task = (IRateLimitTask) Class.forName("net.lopymine.patpat.plugin.folia.FoliaRateLimitTask").getConstructor().newInstance();
+			} catch (InstantiationException e) {
+				PatLogger.error("InstantiationException", e);
+				throw new RuntimeException(e);
+			} catch (IllegalAccessException e) {
+				PatLogger.error("Illegal access exception", e);
+				throw new RuntimeException(e);
+			} catch (InvocationTargetException e) {
+				PatLogger.error("InvocationTargetException", e);
+				throw new RuntimeException(e);
+			} catch (NoSuchMethodException e) {
+				PatLogger.error("Method not found!", e);
+				throw new RuntimeException(e);
+			} catch (ClassNotFoundException e) {
+				PatLogger.error("Class not found!", e);
+				throw new RuntimeException(e);
+			}
+			return;
+		}
+		task = new BukkitRateLimitTask();
+		reloadTask();
+	}
 
 	public static int getAvailablePats(UUID uuid) {
 		return uuidToPat.getOrDefault(uuid, PatPatConfig.getInstance().getRateLimit().getTokenLimit());
@@ -53,21 +82,19 @@ public class RateLimitManager {
 	}
 
 	public static void reloadTask() {
-		if (task != null) {
-			task.cancel();
-			task = null;
-		}
+		init();
+		task.stop();
 		RateLimitConfig config = PatPatConfig.getInstance().getRateLimit();
 		if (!config.isEnabled()) {
 			return;
 		}
 		Time configInterval = config.getTokenInterval();
 		long period = configInterval.getValue() * configInterval.getUnit().getMultiplier() * 20L;
-		task = Bukkit.getScheduler().runTaskTimerAsynchronously(
+		task.start(
 				PatPatPlugin.getInstance(),
-				() -> RateLimitManager.addPats(config.getTokenIncrement()),
-				0,
-				period
+				period,
+				() -> RateLimitManager.addPats(config.getTokenIncrement())
 		);
 	}
+
 }

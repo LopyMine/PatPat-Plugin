@@ -2,7 +2,7 @@ package net.lopymine.patpat.plugin.config.adapter;
 
 import com.google.gson.*;
 
-import net.lopymine.patpat.plugin.command.ratelimit.Time;
+import net.lopymine.patpat.plugin.ratelimit.Time;
 
 import java.lang.reflect.Type;
 

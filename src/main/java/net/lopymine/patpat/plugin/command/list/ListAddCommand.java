@@ -88,7 +88,7 @@ public class ListAddCommand implements ICommand {
 		if (config.add(uuid, nickname)) {
 			TranslatableComponent component = Component.translatable("patpat.command.list.add.success")
 					.color(NamedTextColor.GREEN)
-					.args(nicknameComponent);
+					.arguments(nicknameComponent);
 
 			sender.sendMsg(component);
 			config.save();
@@ -99,7 +99,7 @@ public class ListAddCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("list.add");
+		return StringUtils.commandPermission("list.add");
 	}
 
 	@Override

@@ -2,7 +2,8 @@ name: PatPatPlugin
 version: ${version}
 main: net.lopymine.patpat.plugin.PatPatPlugin
 api-version: '1.16'
+folia-supported: true
 commands:
   patpat:
     description: "Command to configure and control the PatPat Plugin"
-    usage: "/patpat (info | list | ratelimit | reload)"
+    usage: "/patpat (info | list | ratelimit | reload | pat)"

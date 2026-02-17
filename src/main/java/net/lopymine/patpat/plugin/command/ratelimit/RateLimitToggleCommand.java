@@ -7,6 +7,7 @@ import org.bukkit.command.CommandSender;
 import net.lopymine.patpat.plugin.command.api.ICommand;
 import net.lopymine.patpat.plugin.config.*;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.*;
@@ -36,7 +37,7 @@ public abstract class RateLimitToggleCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.toggle");
+		return StringUtils.commandPermission("ratelimit.toggle");
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import net.lopymine.patpat.plugin.command.api.ICommand;
 import net.lopymine.patpat.plugin.config.PatPatConfig;
 import net.lopymine.patpat.plugin.config.RateLimitConfig;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
+import net.lopymine.patpat.plugin.ratelimit.RateLimitManager;
 import net.lopymine.patpat.plugin.util.StringUtils;
 
 import java.util.Collections;
@@ -87,7 +88,7 @@ public class RateLimitInfoCommand implements ICommand {
 
 	@Override
 	public String getPermissionKey() {
-		return StringUtils.permission("ratelimit.info");
+		return StringUtils.commandPermission("ratelimit.info");
 	}
 
 	@Override

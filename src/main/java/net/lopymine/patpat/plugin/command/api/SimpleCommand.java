@@ -5,7 +5,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
-import net.lopymine.patpat.plugin.command.PatPatCommandManager;
+import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
 
 import java.util.*;
@@ -96,6 +96,11 @@ public final class SimpleCommand implements TabExecutor {
 				accept(sender, args);
 				return true;
 			}
+			PatLogger.debug(
+					"Player '%s' try usage command, but player don't have '%s' permission",
+					sender.getName(),
+					permission
+			);
 			if (msgNoPermission != null) {
 				sender.sendMsg(msgNoPermission);
 			}
@@ -109,7 +114,7 @@ public final class SimpleCommand implements TabExecutor {
 		if (command != null) {
 			command.execute(sender, args);
 		} else if (usage != null) {
-			PatPatCommandManager.sendMessage(sender, usage);
+			sender.sendMsg(Component.text(usage));
 		}
 	}
 
@@ -128,17 +133,20 @@ public final class SimpleCommand implements TabExecutor {
 				return simpleCommand.onTabComplete(sender, command, label, cropArgs);
 			}
 			return Collections.emptyList();
-		} else if (this.command != null) {
-			return this.command.getSuggestions(sender, args);
 		}
-		return child.entrySet().stream()
+		List<String> suggestions = new ArrayList<>();
+		if (this.command != null) {
+			suggestions.addAll(this.command.getSuggestions(sender, args));
+		}
+		suggestions.addAll(child.entrySet().stream()
 				.filter(e -> e.getKey().startsWith(cmd))
 				.filter(e -> {
 					String perm = e.getValue().permission;
 					return perm == null || sender.hasPermission(perm);
 				})
 				.map(Map.Entry::getKey)
-				.toList();
+				.toList());
+		return suggestions;
 	}
 
 	public static final class Builder {

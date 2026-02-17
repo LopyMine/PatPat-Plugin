@@ -1,0 +1,66 @@
+name: Run full tests
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+
+  bukkit-server-tests:
+    needs: build
+    strategy:
+      matrix:
+        version: [ "1.16.5", "1.20.1", "1.21.11" ]
+    uses: ./.github/workflows/server-basic-test.yml
+    with:
+      kernel: "bukkit"
+      version: ${{ matrix.version }}
+
+  spigot-server-tests:
+    needs: build
+    strategy:
+      matrix:
+        version: [ "1.16.5", "1.20.1", "1.21.11" ]
+    uses: ./.github/workflows/server-basic-test.yml
+    with:
+      kernel: "spigot"
+      version: ${{ matrix.version }}
+
+  paper-server-tests:
+    needs: build
+    strategy:
+      matrix:
+        version: [ "1.16.5", "1.20.1", "1.21.11" ]
+    uses: ./.github/workflows/server-basic-test.yml
+    with:
+      kernel: "paper"
+      version: ${{ matrix.version }}
+
+  paper-advanced-server-tests:
+    needs: paper-server-tests
+    strategy:
+      matrix:
+        version: [ "1.16.5", "1.20.1", "1.21.1" ]
+    uses: ./.github/workflows/server-advanced-test.yml
+    with:
+      kernel: "paper"
+      version: ${{ matrix.version }}
+
+  folia-server-tests:
+    needs: build
+    strategy:
+      matrix:
+        version: [ "1.20.1", "1.21.8" ]
+    uses: ./.github/workflows/server-basic-test.yml
+    with:
+      kernel: "folia"
+      version: ${{ matrix.version }}
+
+  folia-advanced-server-tests:
+    needs: folia-server-tests
+    strategy:
+      matrix:
+        version: [ "1.20.1", "1.21.8" ]
+    uses: ./.github/workflows/server-advanced-test.yml
+    with:
+      kernel: "folia"
+      version: ${{ matrix.version }}

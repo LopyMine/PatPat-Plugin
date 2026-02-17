@@ -1,0 +1,86 @@
+name: Run server and connect clients for advanced test
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version minecraft server, where will testing plugin (like 1.21.11)'
+        required: true
+        type: string
+      kernel:
+        description: 'Version minecraft server, where will testing plugin (bukkit, spigot, paper)'
+        required: true
+        type: string
+
+jobs:
+  server-advanced-test:
+    runs-on: ubuntu-22.04
+    env:
+      SERVER_FOLDER: ${{ inputs.kernel }}_${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: select java version
+        run: |
+          MC_VERSION="${{ inputs.version }}"
+          MAJOR=$(echo "$MC_VERSION" | cut -d. -f2)
+          if [ "$MAJOR" -le 16 ]; then
+            echo "JAVA_VERSION=16" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: install npm dependencies
+        working-directory: ./.github/scripts/node
+        run: npm install
+      - name: install server
+        run: curl -fsSL https://raw.githubusercontent.com/nikita51bot/MinecraftServerDownloader/refs/heads/main/auto_download_minecraft_server.sh | bash -s -- --version ${{ inputs.version }} --kernel ${{ inputs.kernel }}
+      - name: download plugin
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin
+          path: ./${{ env.SERVER_FOLDER }}/plugins/
+      - name: add folia helper plugin
+        if: inputs.kernel == 'folia'
+        run: mv .github/additional_plugins/folia-spawn-on-zeros-1.0.jar ./$SERVER_FOLDER/plugins/folia-spawn-on-zeros-1.0.jar
+      - name: move server.properties in server folder
+        run: mv .github/templates/advanced-test.properties ./$SERVER_FOLDER/server.properties
+      - name: run server
+        working-directory: ./${{ env.SERVER_FOLDER }}
+        run: |
+          chmod +x start.sh
+          nohup ./start.sh > server.log 2>&1 &
+          echo $! > server.pid
+          
+          tail -f server.log | while read line; do
+            echo "$line"
+            if echo "$line" | grep -q "INFO]: Done "; then
+              break
+            fi
+          done
+      - name: run tests
+        working-directory: ./.github/scripts/node
+        run: |
+          VERSION="${{ inputs.version }}"
+          KERNEL="${{ inputs.kernel }}"
+
+          MINOR=$(echo "$VERSION" | cut -d. -f2)
+          PATCH=$(echo "$VERSION" | cut -d. -f3)
+          if [[ "$KERNEL" == "folia" ]]; then
+            if [[ "$MINOR" -gt 21 ]]; then node test.js
+            elif [[ "$MINOR" -eq 21 && "$PATCH" -ge 8 ]]; then node test.js
+            else node test.js --folia; fi
+          else
+            node test.js
+          fi
+      - name: Upload reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: ${{ env.SERVER_FOLDER }}/server.log

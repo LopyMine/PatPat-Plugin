@@ -2,15 +2,21 @@ import me.modmuss50.mpp.ReleaseType
 
 plugins {
 	id("java")
-	id("xyz.jpenilla.run-paper") version "2.3.0"
-	id("me.modmuss50.mod-publish-plugin") version "0.7.4"
+	id("me.modmuss50.mod-publish-plugin") version "1.1.0"
+	id("com.gradleup.shadow") version "9.1.0"
 }
 
 group = prop("plugin_maven_group")
 version = prop("plugin_version")
 
+def mainJava = prop("java_main_version") as int
+def foliaJava = prop("java_folia_version") as int
+def testJava = prop("java_tests_version") as int
+
+def mainJavaVersion = JavaVersion.toVersion(mainJava)
+
 base {
-	archivesName = prop("plugin_name")
+	archivesName = prop("plugin_id")
 }
 
 repositories {
@@ -29,12 +35,8 @@ repositories {
 	}
 }
 
-configurations {
-	extraLibs
-}
-
 dependencies {
-	// Spigot API
+	// Spigot-API
 	compileOnly("org.spigotmc:spigot-api:${prop("spigot-api")}")
 
 	// Lombok
@@ -42,11 +44,13 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
 
 	// Jetbrains Annotations
-	implementation("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
+	compileOnly("org.jetbrains:annotations:${prop("jetbrains-annotations")}")
 
 	// Adventure-API
-	implementation("net.kyori:adventure-platform-bukkit:4.4.1")
-	extraLibs("net.kyori:adventure-platform-bukkit:4.4.1")
+	implementation("net.kyori:adventure-platform-bukkit:${prop("adventure-platform-bukkit")}")
+
+	// PatPat API
+	implementation("ru.nik51:patpat-plugin-api:1.0.0")
 
 	testImplementation('ch.qos.logback:logback-classic:1.5.18')
 	testImplementation(platform('org.junit:junit-bom:5.12.2'))
@@ -55,10 +59,6 @@ dependencies {
 	testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v1.21:4.0.0")
 }
 
-def mainJava = prop("java_version") as int
-def testJava = 21
-
-def mainJavaVersion = JavaVersion.toVersion(mainJava)
 java {
 	sourceCompatibility = mainJavaVersion
 	targetCompatibility = mainJavaVersion
@@ -68,23 +68,66 @@ java {
 }
 
 tasks.register('submodulesUpdate', Exec) {
-	description 'Updates (and inits) git submodules'
+	description = 'Updates (and inits) git submodules'
 	commandLine 'git', 'submodule', 'update', '--init', '--force', '--remote'
 }
 processResources.dependsOn submodulesUpdate
 
 jar {
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+sourceSets {
+	folia {
+		java {
+			srcDirs = ['src/folia/java']
+		}
+		dependencies {
+			// Folia-API
+			foliaImplementation("dev.folia:folia-api:1.20.1-R0.1-SNAPSHOT")
+
+			// Lombok
+			foliaCompileOnly("org.projectlombok:lombok:${prop("lombok-version")}")
+			foliaAnnotationProcessor("org.projectlombok:lombok:${prop("lombok-version")}")
+		}
+
+		compileClasspath += sourceSets.main.output + configurations.compileClasspath
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+tasks.compileFoliaJava {
+	description = "Compile Folia classes"
+	group = "build"
+
+	java.sourceCompatibility = foliaJava
+	java.targetCompatibility = foliaJava
+
+	source = sourceSets.folia.java
+	classpath = sourceSets.folia.compileClasspath
+	destinationDirectory = layout.buildDirectory.dir("classes/folia")
+
+	options.release.set(foliaJava)
+}
+
+tasks.shadowJar {
+	dependsOn tasks.named('compileFoliaJava')
+
+	archiveClassifier.set("")
+
+	from './build/classes/folia'
+
+	exclude 'META-INF/**'
 	from("patpat-languages-files/lang") {
 		into "lang"
 	}
+	relocate 'net.kyori', 'shaded.net.kyori'
 
-	from {
-		configurations.extraLibs.collect {
-			it.isDirectory() ? it : zipTree(it)
-		}
-	} {
-		exclude 'META-INF/**'
+	def argOutputDir = project.findProperty("outputDir")
+	if (argOutputDir != null) {
+		destinationDirectory = file(argOutputDir)
+	} else {
+		destinationDirectory = file("$rootDir/libs")
 	}
 }
 
@@ -117,69 +160,35 @@ processResources {
 		inputs.property key, value
 	}
 
-	filteringCharset 'UTF-8'
+	filteringCharset = 'UTF-8'
 	filesMatching('plugin.yml') {
 		expand(props)
 	}
 }
 
-tasks.register('reBuild', Delete) {
-	group("build")
-	delete(project.rootProject.layout.buildDirectory.file("libs/${prop("plugin_name")}-${version}.jar"))
-	finalizedBy("build")
-}
-
-tasks.register('copyPluginJar', Copy) {
-	dependsOn jar
-	onlyIf { project.hasProperty('outputDir') }
-
-	from jar.archiveFile
-	into file(project.findProperty('outputDir') ?: 'undefined')
-
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-
-	doFirst {
-		def targetDir = file(project.outputDir)
-		if (!targetDir.exists()) {
-			targetDir.mkdirs()
-		}
-		println "Copy JAR in: ${targetDir.absolutePath}"
-	}
-}
-build.finalizedBy copyPluginJar
-
-runServer {
-	minecraftVersion(prop("minecraft_version").toString())
-}
-
 publishMods {
+	file = getVerifiedOrDefaultJar(prop("plugin_id"), prop("plugin_version"))
+
+	def isTesting = Boolean.parseBoolean(prop("test_publish").toString())
+	def isCurseForgeKeyProvided = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
+	def isModrinthKeyProvided = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
+	def bl3 = isTesting || isModrinthKeyProvided || isCurseForgeKeyProvided
+	dryRun = bl3
+
 	def loaders = prop("loaders").toString().split(" ")
 	def modrinthProjectId = prop("modrinth_id").toString()
-	def embedsDepends = prop("embeds").toString().split(" ")
 	def curseForgeProjectId = prop("curseforge_id").toString()
-	def requiresDepends = prop("requires").toString().split(" ")
-	def optionalDepends = prop("optional").toString().split(" ")
 	def endSupportedVersion = prop("end_supported_version").toString()
-	def incompatibleDepends = prop("incompatible").toString().split(" ")
 	def startSupportedVersion = prop("start_supported_version").toString()
 	def versionTypeProperty = prop("version_type").toString().replace("RELEASE", "STABLE")
-	def maxJavaVersion = JavaVersion.toVersion(prop("max_java_version"))
-	def isClient = Boolean.parseBoolean(prop("is_for_client)").toString())
-	def isTesting = Boolean.parseBoolean(prop("test_publish)").toString())
-	def isServer = Boolean.parseBoolean(prop("is_for_server)").toString())
 	def versionName = "[${startSupportedVersion}-${endSupportedVersion}] ${prop("plugin_name")} v${prop("plugin_version")}"
-	def bl = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
-	def bl2 = providers.environmentVariable("MODRINTH_API_KEY").getOrNull() == null
-	def bl3 = isTesting || bl || bl2
 
 	println "[PublishMods] [INFO] Configuring '${versionName}' for publishing"
 
 	displayName = versionName
-	file = getVerifiedOrDefaultJar(prop("plugin_name"), prop("plugin_version"))
 	changelog = getChangeLog()
 	type = ReleaseType.of(versionTypeProperty)
 	modLoaders.addAll(loaders)
-	dryRun = bl3
 
 	if (bl3) {
 		println "[PublishMods] [WARNING] Test Mode is Enabled!"
@@ -232,19 +241,6 @@ publishMods {
 		} else {
 			minecraftVersions.add(endSupportedVersion)
 		}
-
-		if (requiresDepends.first() != "none") {
-			requires(requiresDepends)
-		}
-		if (optionalDepends.first() != "none") {
-			optional(optionalDepends)
-		}
-		if (incompatibleDepends.first() != "none") {
-			incompatible(incompatibleDepends)
-		}
-		if (embedsDepends.first() != "none") {
-			embeds(embedsDepends)
-		}
 	}
 }
 
@@ -260,7 +256,7 @@ def getVerifiedOrDefaultJar(String pluginName, String pluginVersion) {
 }
 
 String getChangeLog() {
-	def file = project.rootProject.file("publish/CHANGELOG.md")
+	def file = project.rootProject.file("CHANGELOG.md")
 	if (file.exists()) {
 		def text = file.getText()
 		if (!text.isBlank()) {
