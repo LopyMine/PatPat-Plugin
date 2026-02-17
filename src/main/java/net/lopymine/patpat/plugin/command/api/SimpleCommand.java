@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 
+import net.lopymine.patpat.plugin.PatLogger;
 import net.lopymine.patpat.plugin.extension.CommandSenderExtension;
 
 import java.util.*;
@@ -95,6 +96,11 @@ public final class SimpleCommand implements TabExecutor {
 				accept(sender, args);
 				return true;
 			}
+			PatLogger.debug(
+					"Player '%s' try usage command, but player don't have '%s' permission",
+					sender.getName(),
+					permission
+			);
 			if (msgNoPermission != null) {
 				sender.sendMsg(msgNoPermission);
 			}
