@@ -13,9 +13,15 @@ assignees: ''
 
 ### Environment
 
-- Minecraft Version: *VERSION*
-- Mod Version: *VERSION*
+*Copy info about plugin from the command*
+```shell
+/patpat info
+```
+*Also, if the problem is related to the client, add info about client*
+```shell
+/patpat-client info
+```
 
 ### Attachments
-1) Attach your latest game logs from `.minecraft/logs/latest.log` ← *IMPORTANT*
+1) Attach your latest game logs from `<SERVER_FOLDER>/logs/latest.log` ← *IMPORTANT*
 2) Attach some images/video with the problem ← *OPTIONAL*
