@@ -7,7 +7,9 @@ import net.lopymine.patpat.plugin.config.RateLimitConfig;
 import net.lopymine.patpat.plugin.util.FoliaUtils;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RateLimitManager {
 
@@ -17,7 +19,7 @@ public class RateLimitManager {
 
 	private static IRateLimitTask task;
 
-	private static final Map<UUID, Integer> uuidToPat = new HashMap<>();
+	private static final Map<UUID, Integer> uuidToPat = new ConcurrentHashMap<>();
 
 	public static void init() {
 		if (task != null) {
@@ -57,27 +59,29 @@ public class RateLimitManager {
 		if (!config.isEnabled()) {
 			return true;
 		}
-		int availablePats = uuidToPat.getOrDefault(
-				uuid,
-				config.getTokenLimit()
-		) - 1;
-		if (availablePats < 0) {
-			return false;
-		}
-		uuidToPat.put(uuid, availablePats);
-		return true;
+		
+		boolean[] allowed = new boolean[1];
+		uuidToPat.compute(uuid, (k, current) -> {
+			if (current == null) {
+				current = config.getTokenLimit();
+			}
+			if (current > 0) {
+				allowed[0] = true;
+				return current - 1;
+			}
+			allowed[0] = false;
+			return current;
+		});
+		return allowed[0];
 	}
 
 	public static void addPats(int token) {
 		int tokenLimit = PatPatConfig.getInstance().getRateLimit().getTokenLimit();
-		for (Iterator<Map.Entry<UUID, Integer>> it = uuidToPat.entrySet().iterator(); it.hasNext(); ) {
-			Map.Entry<UUID, Integer> entry = it.next();
-			int value = entry.getValue() + token;
-			if (value > tokenLimit) {
-				it.remove();
-				continue;
-			}
-			uuidToPat.put(entry.getKey(), value);
+		for (Map.Entry<UUID, Integer> entry : uuidToPat.entrySet()) {
+			uuidToPat.computeIfPresent(entry.getKey(), (k, v) -> {
+				int newValue = v + token;
+				return newValue > tokenLimit ? null : newValue;
+			});
 		}
 	}
 
