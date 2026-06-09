@@ -6,15 +6,32 @@ import org.bukkit.entity.Player;
 import net.lopymine.patpat.plugin.util.FoliaUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class PatPlayerFactory {
 
-	public static IPatPlayer of(Player player) {
-		if(FoliaUtils.IS_FOLIA){
+	private static Method foliaOfMethod;
+	private static Method foliaRegisterMethod;
+	private static Method foliaUnregisterMethod;
+
+	static {
+		if (FoliaUtils.IS_FOLIA) {
 			try {
-				return (IPatPlayer) Class.forName("net.lopymine.patpat.plugin.folia.FoliaPatPlayer").getMethod("of", Player.class).invoke(null, player);
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException |
-			         ClassNotFoundException e) {
+				Class<?> foliaClass = Class.forName("net.lopymine.patpat.plugin.folia.FoliaPatPlayer");
+				foliaOfMethod = foliaClass.getMethod("of", Player.class);
+				foliaRegisterMethod = foliaClass.getMethod("register", Player.class);
+				foliaUnregisterMethod = foliaClass.getMethod("unregister", Player.class);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to initialize FoliaPatPlayer methods via reflection", e);
+			}
+		}
+	}
+
+	public static IPatPlayer of(Player player) {
+		if (FoliaUtils.IS_FOLIA) {
+			try {
+				return (IPatPlayer) foliaOfMethod.invoke(null, player);
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
@@ -24,11 +41,10 @@ public class PatPlayerFactory {
 
 	@CanIgnoreReturnValue
 	public static IPatPlayer register(Player player) {
-		if(FoliaUtils.IS_FOLIA){
+		if (FoliaUtils.IS_FOLIA) {
 			try {
-				return (IPatPlayer) Class.forName("net.lopymine.patpat.plugin.folia.FoliaPatPlayer").getMethod("register", Player.class).invoke(null, player);
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException |
-			         ClassNotFoundException e) {
+				return (IPatPlayer) foliaRegisterMethod.invoke(null, player);
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
@@ -37,11 +53,10 @@ public class PatPlayerFactory {
 	}
 
 	public static void unregister(Player player) {
-		if(FoliaUtils.IS_FOLIA){
+		if (FoliaUtils.IS_FOLIA) {
 			try {
-				Class.forName("net.lopymine.patpat.plugin.folia.FoliaPatPlayer").getMethod("unregister", Player.class).invoke(null, player);
-			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException |
-			         ClassNotFoundException e) {
+				foliaUnregisterMethod.invoke(null, player);
+			} catch (IllegalAccessException | InvocationTargetException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
