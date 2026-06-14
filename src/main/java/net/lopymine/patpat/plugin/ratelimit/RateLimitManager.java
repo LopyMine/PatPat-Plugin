@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RateLimitManager {
 
@@ -17,17 +18,17 @@ public class RateLimitManager {
 		throw new IllegalStateException("Manager class");
 	}
 
-	private static IRateLimitTask task;
+	private static final AtomicReference<IRateLimitTask> taskRef = new AtomicReference<>();
 
 	private static final Map<UUID, Integer> uuidToPat = new ConcurrentHashMap<>();
 
-	public static void init() {
-		if (task != null) {
+	public static synchronized void init() {
+		if (taskRef.get() != null) {
 			return;
 		}
-		if(FoliaUtils.IS_FOLIA){
+		if (FoliaUtils.IS_FOLIA) {
 			try {
-				task = (IRateLimitTask) Class.forName("net.lopymine.patpat.plugin.folia.FoliaRateLimitTask").getConstructor().newInstance();
+				taskRef.set((IRateLimitTask) Class.forName("net.lopymine.patpat.plugin.folia.FoliaRateLimitTask").getConstructor().newInstance());
 			} catch (InstantiationException e) {
 				PatLogger.error("InstantiationException", e);
 				throw new RuntimeException(e);
@@ -46,7 +47,7 @@ public class RateLimitManager {
 			}
 			return;
 		}
-		task = new BukkitRateLimitTask();
+		taskRef.set(new BukkitRateLimitTask());
 		reloadTask();
 	}
 
@@ -59,7 +60,7 @@ public class RateLimitManager {
 		if (!config.isEnabled()) {
 			return true;
 		}
-		
+
 		boolean[] allowed = new boolean[1];
 		uuidToPat.compute(uuid, (k, current) -> {
 			if (current == null) {
@@ -69,7 +70,6 @@ public class RateLimitManager {
 				allowed[0] = true;
 				return current - 1;
 			}
-			allowed[0] = false;
 			return current;
 		});
 		return allowed[0];
@@ -85,20 +85,20 @@ public class RateLimitManager {
 		}
 	}
 
-	public static void reloadTask() {
+	public static synchronized void reloadTask() {
 		init();
-		task.stop();
+		IRateLimitTask current = taskRef.get();
+		current.stop();
 		RateLimitConfig config = PatPatConfig.getInstance().getRateLimit();
 		if (!config.isEnabled()) {
 			return;
 		}
 		Time configInterval = config.getTokenInterval();
 		long period = configInterval.getValue() * configInterval.getUnit().getMultiplier() * 20L;
-		task.start(
+		current.start(
 				PatPatPlugin.getInstance(),
 				period,
 				() -> RateLimitManager.addPats(config.getTokenIncrement())
 		);
 	}
-
 }
