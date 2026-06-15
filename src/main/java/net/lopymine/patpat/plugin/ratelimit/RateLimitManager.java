@@ -10,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RateLimitManager {
 
@@ -18,17 +17,17 @@ public class RateLimitManager {
 		throw new IllegalStateException("Manager class");
 	}
 
-	private static final AtomicReference<IRateLimitTask> taskRef = new AtomicReference<>();
+	private static volatile IRateLimitTask task;
 
 	private static final Map<UUID, Integer> uuidToPat = new ConcurrentHashMap<>();
 
-	public static synchronized void init() {
-		if (taskRef.get() != null) {
+	private static synchronized void ensureTaskCreated() {
+		if (task != null) {
 			return;
 		}
 		if (FoliaUtils.IS_FOLIA) {
 			try {
-				taskRef.set((IRateLimitTask) Class.forName("net.lopymine.patpat.plugin.folia.FoliaRateLimitTask").getConstructor().newInstance());
+				task = (IRateLimitTask) Class.forName("net.lopymine.patpat.plugin.folia.FoliaRateLimitTask").getConstructor().newInstance();
 			} catch (InstantiationException e) {
 				PatLogger.error("InstantiationException", e);
 				throw new RuntimeException(e);
@@ -47,8 +46,7 @@ public class RateLimitManager {
 			}
 			return;
 		}
-		taskRef.set(new BukkitRateLimitTask());
-		reloadTask();
+		task = new BukkitRateLimitTask();
 	}
 
 	public static int getAvailablePats(UUID uuid) {
@@ -86,16 +84,15 @@ public class RateLimitManager {
 	}
 
 	public static synchronized void reloadTask() {
-		init();
-		IRateLimitTask current = taskRef.get();
-		current.stop();
+		ensureTaskCreated();
+		task.stop();
 		RateLimitConfig config = PatPatConfig.getInstance().getRateLimit();
 		if (!config.isEnabled()) {
 			return;
 		}
 		Time configInterval = config.getTokenInterval();
 		long period = configInterval.getValue() * configInterval.getUnit().getMultiplier() * 20L;
-		current.start(
+		task.start(
 				PatPatPlugin.getInstance(),
 				period,
 				() -> RateLimitManager.addPats(config.getTokenIncrement())
