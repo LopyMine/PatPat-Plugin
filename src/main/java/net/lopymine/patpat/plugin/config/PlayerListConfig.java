@@ -70,22 +70,27 @@ public class PlayerListConfig {
 		}
 		PlayerListConfig config = new PlayerListConfig();
 
-		int lineNumber = 0;
-		String line = null;
 		try (BufferedReader reader = new BufferedReader(new FileReader(CONFIG_FILE))) {
-			line = reader.readLine();
+			String line = reader.readLine();
+			int lineNumber = 0;
 			while (line != null) {
 				lineNumber++;
-				String[] uuidNicknamePair = line.split(" ");
-				config.nicknameByUuid.put(UUID.fromString(uuidNicknamePair[0]), uuidNicknamePair[1]);
+				if (!line.isBlank()) {
+					try {
+						String[] uuidNicknamePair = line.split(" ");
+						config.nicknameByUuid.put(UUID.fromString(uuidNicknamePair[0]), uuidNicknamePair[1]);
+					} catch (IllegalArgumentException e) {
+						PatLogger.error("Failed to parse line %d in PlayerListConfig: '%s' is not uuid!", lineNumber, line);
+					} catch (ArrayIndexOutOfBoundsException e) {
+						PatLogger.error("Failed to parse line %d in PlayerListConfig: '%s' has invalid format!", lineNumber, line);
+					}
+				}
 				line = reader.readLine();
 			}
-			instance = config;
-		} catch (IllegalArgumentException e) {
-			PatLogger.error("Failed to parse line %d in PlayerListConfig: '%s' is not uuid!", lineNumber, line == null ? "null" : line);
 		} catch (Exception e) {
 			PatLogger.error("Failed to reload PlayerListConfig:", e);
 		}
+		instance = config;
 	}
 
 	public void save() {

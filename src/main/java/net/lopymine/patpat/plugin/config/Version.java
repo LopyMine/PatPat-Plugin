@@ -66,6 +66,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
 				this.patch == version.patch;
 	}
 
+	@NotNull
 	@Override
 	public String toString() {
 		return "%d.%d.%d".formatted(this.major, this.minor, this.patch);
@@ -85,6 +86,7 @@ public record Version(int major, int minor, int patch) implements Comparable<Ver
 
 	static {
 		String pluginVersion = PatPatPlugin.getInstance().getDescription().getVersion();
-		CURRENT_PLUGIN_VERSION = Version.of(pluginVersion.substring(0, pluginVersion.indexOf('+')));
+		int plusIndex = pluginVersion.indexOf('+');
+		CURRENT_PLUGIN_VERSION = Version.of(plusIndex == -1 ? pluginVersion : pluginVersion.substring(0, plusIndex));
 	}
 }

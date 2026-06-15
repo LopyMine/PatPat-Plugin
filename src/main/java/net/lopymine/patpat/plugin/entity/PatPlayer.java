@@ -16,7 +16,7 @@ import org.jetbrains.annotations.*;
 @Getter
 public class PatPlayer implements IPatPlayer {
 
-	private static final Map<Player, PatPlayer> PAT_PLAYERS = new HashMap<>();
+	private static final Map<Player, PatPlayer> PAT_PLAYERS = new WeakHashMap<>();
 
 	private final Player player;
 	private Version version = PatPacketV1.PAT_PACKET_V1_VERSION;

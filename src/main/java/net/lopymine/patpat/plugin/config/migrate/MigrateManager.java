@@ -41,13 +41,14 @@ public class MigrateManager {
 		}
 
 		File configFile = new File(FileUtils.CONFIG_FOLDER, "config.json");
-		JsonConfigReader reader = new JsonConfigReader(new File(FileUtils.CONFIG_FOLDER, "config.json"));
-		if(reader.readConfig() == ReadStatus.FILE_READ_ERROR) {
+		JsonConfigReader reader = new JsonConfigReader(configFile);
+		ReadStatus status = reader.readConfig();
+		if (status == ReadStatus.FILE_READ_ERROR) {
 			PatLogger.error("Failed read config as json, try backup and create new");
 			FileUtils.backupFile(configFile, true);
 			return;
 		}
-		if(reader.readConfig() == ReadStatus.FILE_NOT_FOUND) {
+		if (status == ReadStatus.FILE_NOT_FOUND) {
 			PatLogger.info("Config is not exists, will be created");
 			return;
 		}
